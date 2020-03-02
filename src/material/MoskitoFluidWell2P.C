@@ -98,25 +98,19 @@ MoskitoFluidWell2P::computeQpProperties()
   MoskitoFluidWellGeneral::computeQpProperties();
 
   // drift-flux calculator section
-  if ( _vmfrac[_qp] == 0.0 || _vmfrac[_qp] == 1.0)
-    {
-      _flow_pat[_qp] = 0;
-      _c0[_qp] = 1.0;
-      _u_d[_qp] = 0.0;
-    }
-
+  if (_phase[_qp] == 2.0)
+  {
+    MoskitoDFGVar DFinp(_u[_qp], _rho_g[_qp], _rho_l[_qp], _vmfrac[_qp],
+      _dia[_qp], _dir[_qp], _friction[_qp], _gravity[_qp], _well_unit_vect[_qp]);
+    dfm_uo.DFMCalculator(DFinp);
+      DFinp.DFMOutput(_flow_pat[_qp], _v_sg[_qp], _v_sl[_qp], _c0[_qp], _u_d[_qp]);
+  }
   else
   {
-  Real temp;   // bypass vfrac calculation of drift flux model
-  MoskitoDFGVar DFinp(_u[_qp], _rho_g[_qp], _rho_l[_qp], _vmfrac[_qp],
-    _dia[_qp], _dir[_qp], _friction[_qp], _gravity[_qp], _well_unit_vect[_qp]);
-  dfm_uo.DFMCalculator(DFinp);
-    DFinp.DFMOutput(_flow_pat[_qp], _v_sg[_qp], _v_sl[_qp], _c0[_qp], _u_d[_qp]);
+    _flow_pat[_qp] = 0;
+    _c0[_qp] = 1.0;
+    _u_d[_qp] = 0.0;
   }
-  // based on volume weighted flow rate
-  // _u_g[_qp]  = _c0[_qp] * _u[_qp] + _u_d[_qp];
-  // _u_l[_qp]  = (1.0 - _vfrac[_qp] * _c0[_qp]) * _u[_qp] - _vfrac[_qp] * _u_d[_qp];
-  // _u_l[_qp] /= 1.0 - _vfrac[_qp];
 
   // based on mass weighted flow rate
   // momentum eq is valid only by mass mixing flow rate

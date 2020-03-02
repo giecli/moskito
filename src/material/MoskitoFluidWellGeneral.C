@@ -93,6 +93,8 @@ MoskitoFluidWellGeneral::computeQpProperties()
 
   _gravity[_qp] = _g;
 
+  // positive is production (towards the bottom hole)
+  // negative is injection (reverse to the bottom hole)
   if (_flow[_qp] != 0.0)
     _dir[_qp] = _flow[_qp] / fabs(_flow[_qp]);
   else
