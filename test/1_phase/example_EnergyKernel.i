@@ -7,8 +7,8 @@
   type = GeneratedMesh
   dim = 1
   xmin = 0
-  xmax = 1
-  nx = 1
+  xmax = 100
+  nx = 50
 []
 
 [UserObjects]
