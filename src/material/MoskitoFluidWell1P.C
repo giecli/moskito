@@ -45,10 +45,8 @@ MoskitoFluidWell1P::MoskitoFluidWell1P(const InputParameters & parameters)
     _cp(declareProperty<Real>("specific_heat")),
     _rho(declareProperty<Real>("density")),
     _drho_dp(declareProperty<Real>("drho_dp")),
-    _drho_dp_2(declareProperty<Real>("drho_dp_2")),
     _drho_dT(declareProperty<Real>("drho_dT")),
-    _drho_dh(declareProperty<Real>("drho_dh")),
-    _drho_dh_2(declareProperty<Real>("drho_dh_2"))
+    _drho_dh(declareProperty<Real>("drho_dh"))
 {
 }
 
@@ -60,8 +58,6 @@ MoskitoFluidWell1P::computeQpProperties()
 
   eos_uo.rho_from_p_T(_P[_qp], _T[_qp], _rho[_qp], _drho_dp[_qp], _drho_dT[_qp]);
   _drho_dh[_qp] = _drho_dT[_qp] / _cp[_qp];
-  _drho_dp_2[_qp] = 0.0;
-  _drho_dh_2[_qp] = 0.0;
 
   _dia[_qp] = _d;
   _area[_qp] = PI * _d * _d / 4.0;

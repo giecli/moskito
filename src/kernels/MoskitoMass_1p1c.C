@@ -21,13 +21,13 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoMass.h"
+#include "MoskitoMass_1p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoMass);
+registerMooseObject("MoskitoApp", MoskitoMass_1p1c);
 
 template <>
 InputParameters
-validParams<MoskitoMass>()
+validParams<MoskitoMass_1p1c>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -39,7 +39,7 @@ validParams<MoskitoMass>()
   return params;
 }
 
-MoskitoMass::MoskitoMass(const InputParameters & parameters)
+MoskitoMass_1p1c::MoskitoMass_1p1c(const InputParameters & parameters)
   : Kernel(parameters),
   _q(coupledValue("flowrate")),
   _grad_q(coupledGradient("flowrate")),
@@ -56,7 +56,7 @@ MoskitoMass::MoskitoMass(const InputParameters & parameters)
 }
 
 Real
-MoskitoMass::computeQpResidual()
+MoskitoMass_1p1c::computeQpResidual()
 {
   RealVectorValue r = 0.0;
 
@@ -70,7 +70,7 @@ MoskitoMass::computeQpResidual()
 }
 
 Real
-MoskitoMass::computeQpJacobian()
+MoskitoMass_1p1c::computeQpJacobian()
 {
   RealVectorValue j = 0.0;
 
@@ -82,7 +82,7 @@ MoskitoMass::computeQpJacobian()
 }
 
 Real
-MoskitoMass::computeQpOffDiagJacobian(unsigned int jvar)
+MoskitoMass_1p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
   RealVectorValue j = 0.0;
   if (jvar == _q_var_number)

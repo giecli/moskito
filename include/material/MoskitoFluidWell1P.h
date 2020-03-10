@@ -51,14 +51,10 @@ protected:
   MaterialProperty<Real> & _rho;
   // The first derivative of density wrt pressure
   MaterialProperty<Real> & _drho_dp;
-  // The second derivative of density wrt pressure
-  MaterialProperty<Real> & _drho_dp_2;
   // The first derivative of density wrt temperature
   MaterialProperty<Real> & _drho_dT;
   // The first derivative of density wrt enthalpy
   MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt enthalpy
-  MaterialProperty<Real> & _drho_dh_2;
 
 };
 
