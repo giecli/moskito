@@ -21,20 +21,20 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOHEAT_H
-#define MOSKITOHEAT_H
+#ifndef MOSKITOLATERALHEAT_H
+#define MOSKITOLATERALHEAT_H
 
 #include "Kernel.h"
 
-class MoskitoHeat;
+class MoskitoLateralHeat;
 
 template <>
-InputParameters validParams<MoskitoHeat>();
+InputParameters validParams<MoskitoLateralHeat>();
 
-class MoskitoHeat : public Kernel
+class MoskitoLateralHeat : public Kernel
 {
 public:
-  MoskitoHeat(const InputParameters & parameters);
+  MoskitoLateralHeat(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -56,4 +56,4 @@ protected:
   const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };
 
-#endif // MOSKITOHEAT_H
+#endif // MOSKITOLATERALHEAT_H
