@@ -21,13 +21,13 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoTimeMass.h"
+#include "MoskitoTimeMass_1p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoTimeMass);
+registerMooseObject("MoskitoApp", MoskitoTimeMass_1p1c);
 
 template <>
 InputParameters
-validParams<MoskitoTimeMass>()
+validParams<MoskitoTimeMass_1p1c>()
 {
   InputParameters params = validParams<TimeKernel>();
 
@@ -38,20 +38,18 @@ validParams<MoskitoTimeMass>()
   return params;
 }
 
-MoskitoTimeMass::MoskitoTimeMass(const InputParameters & parameters)
+MoskitoTimeMass_1p1c::MoskitoTimeMass_1p1c(const InputParameters & parameters)
   : TimeKernel(parameters),
     _h_dot(coupledDot("enthalpy")),
     _dh_dot(coupledDotDu("enthalpy")),
     _h_var_number(coupled("enthalpy")),
     _drho_dp(getMaterialProperty<Real>("drho_dp")),
-    _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
-    _drho_dh(getMaterialProperty<Real>("drho_dh")),
-    _drho_dh_2(getMaterialProperty<Real>("drho_dh_2"))
+    _drho_dh(getMaterialProperty<Real>("drho_dh"))
 {
 }
 
 Real
-MoskitoTimeMass::computeQpResidual()
+MoskitoTimeMass_1p1c::computeQpResidual()
 {
   Real r = 0.0;
 
@@ -63,11 +61,10 @@ MoskitoTimeMass::computeQpResidual()
 }
 
 Real
-MoskitoTimeMass::computeQpJacobian()
+MoskitoTimeMass_1p1c::computeQpJacobian()
 {
   Real j = 0.0;
 
-  j += _drho_dp_2[_qp] * _phi[_j][_qp] * _u_dot[_qp];
   j += _drho_dp[_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
   j *= _test[_i][_qp];
 
@@ -75,13 +72,12 @@ MoskitoTimeMass::computeQpJacobian()
 }
 
 Real
-MoskitoTimeMass::computeQpOffDiagJacobian(unsigned int jvar)
+MoskitoTimeMass_1p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real j = 0.0;
 
   if (jvar == _h_var_number)
   {
-    j += _drho_dh_2[_qp] * _phi[_j][_qp] * _h_dot[_qp];
     j += _drho_dh[_qp] * _phi[_j][_qp] * _dh_dot[_qp];
     j *= _test[_i][_qp];
   }
