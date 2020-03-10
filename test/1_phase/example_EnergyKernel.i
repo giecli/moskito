@@ -40,7 +40,7 @@
 
 [Variables]
   [./h]
-    initial_condition = 3000000
+    initial_condition = 3500000
   [../]
   [./p]
     initial_condition = 1.0e6
@@ -77,23 +77,29 @@
 []
 
 [Preconditioning]
-  active = p1
+  active = pn1
   [./p1]
     type = SMP
     full = true
-    #petsc_options = '-snes_ksp_ew'
-    petsc_options_iname = '-pc_type -pc_hypre_type -snes_type -snes_linesearch_type -sub_pc_factor_shift_type'
-    petsc_options_value = 'hypre boomeramg newtonls basic NONZERO'
+    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
+    petsc_options_value = ' bjacobi  ilu          NONZERO                 '
+  [../]
+  [./pn1]
+    type = SMP
+    full = true
+    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -snes_type -snes_linesearch_type'
+    petsc_options_value = ' bjacobi  ilu          NONZERO                   newtonls   basic               '
   [../]
 []
 
 [Executioner]
   type = Steady
-  l_max_its = 2
-  nl_rel_tol = 1e-4
-  nl_abs_tol = 1e-4
+  l_max_its = 50
+  l_tol = 1e-10
+  nl_rel_tol = 1e-8
   nl_max_its = 50
   solve_type = NEWTON
+  nl_abs_tol = 1e-7
 []
 
 [Outputs]
