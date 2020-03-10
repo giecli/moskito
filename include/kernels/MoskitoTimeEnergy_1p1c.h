@@ -25,15 +25,15 @@
 
 #include "TimeKernel.h"
 
-class MoskitoTimeEnergy;
+class MoskitoTimeEnergy_1p1c;
 
 template <>
-InputParameters validParams<MoskitoTimeEnergy>();
+InputParameters validParams<MoskitoTimeEnergy_1p1c>();
 
-class MoskitoTimeEnergy : public TimeKernel
+class MoskitoTimeEnergy_1p1c : public TimeKernel
 {
 public:
-  MoskitoTimeEnergy(const InputParameters & parameters);
+  MoskitoTimeEnergy_1p1c(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -55,10 +55,6 @@ protected:
   const MaterialProperty<Real> & _rho;
   // The first derivative of density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
   // The first derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
 };
