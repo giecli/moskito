@@ -37,7 +37,12 @@ validParams<MoskitoFluidWellGeneral>()
   params.addParam<Real>("casing_thermal_conductivity", 0.0, "Thermal conductivity of casing");
   params.addParam<Real>("casing_thickness", 0.0, "Thickness of casing");
 
-  params.addRequiredRangeCheckedParam<Real>("well_diameter", "well_diameter>0", "Well diameter (m)");
+  params.addRequiredRangeCheckedParam<Real>("well_diameter", "well_diameter>0", "Inner well diameter (m)");
+  params.addParam<Real>("manual_cross_section_area", 0.0, "User defined cross section area for a case of an arbitarary pipe shape"
+                        " (particularly useful for coaxial pipes)");
+  params.addParam<Real>("manual_wetted_perimeter", 0.0, "User defined wetted perimeter for a case of an arbitarary pipe shape"
+                        " (particularly useful for coaxial pipes)"  );
+
   params.addRangeCheckedParam<Real>("roughness", 2.5e-5, "roughness>0", "Material roughness of well casing (m)");
   params.addRangeCheckedParam<Real>("manual_friction_factor", 0.0, "manual_friction_factor>=0",
                                     "User defined constant friction factor (if it is defined, the automatic "
@@ -64,6 +69,7 @@ MoskitoFluidWellGeneral::MoskitoFluidWellGeneral(const InputParameters & paramet
     _friction(declareProperty<Real>("well_moody_friction")),
     _dia(declareProperty<Real>("well_diameter")),
     _area(declareProperty<Real>("well_area")),
+    _perimeter(declareProperty<Real>("well_perimeter")),
     _well_dir(declareProperty<RealVectorValue>("well_direction_vector")),
     _gravity(declareProperty<RealVectorValue>("gravity")),
     _T(declareProperty<Real>("temperature")),
@@ -77,20 +83,29 @@ MoskitoFluidWellGeneral::MoskitoFluidWellGeneral(const InputParameters & paramet
     _thickness(getParam<Real>("casing_thickness")),
     _d(getParam<Real>("well_diameter")),
     _rel_roughness(getParam<Real>("roughness")),
-    _f(getParam<Real>("manual_friction_factor")),
+    _u_f(getParam<Real>("manual_friction_factor")),
+    _u_area(getParam<Real>("manual_cross_section_area")),
+    _u_perimeter(getParam<Real>("manual_wetted_perimeter")),
     _f_defined(parameters.isParamSetByUser("manual_friction_factor")),
+    _area_defined(parameters.isParamSetByUser("manual_cross_section_area")),
+    _perimeter_defined(parameters.isParamSetByUser("manual_wetted_perimeter")),
     _roughness_type(getParam<MooseEnum>("roughness_type")),
     _well_direction(getParam<MooseEnum>("well_direction")),
     _well_type(getParam<MooseEnum>("well_type"))
 {
   _rel_roughness /= _d;
+
+  if (!(_area_defined*_perimeter_defined))
+    if (_area_defined || _perimeter_defined)
+      mooseError(name(), ": both perimeter and area should be defined "
+                , "in a case of an arbitarary pipe shape");
 }
 
 void
 MoskitoFluidWellGeneral::computeQpProperties()
 {
   if (_f_defined)
-    _friction[_qp] = _f;
+    _friction[_qp] = _u_f;
   else
     MoodyFrictionFactor(_friction[_qp], _rel_roughness, _Re[_qp], _roughness_type);
 

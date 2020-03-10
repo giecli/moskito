@@ -60,7 +60,16 @@ MoskitoFluidWell1P::computeQpProperties()
   _drho_dh[_qp] = _drho_dT[_qp] / _cp[_qp];
 
   _dia[_qp] = _d;
-  _area[_qp] = PI * _d * _d / 4.0;
+  if (!(_area_defined*_perimeter_defined))
+  {
+    _area[_qp] = PI * _dia[_qp] * _dia[_qp] / 4.0;
+    _perimeter[_qp] = PI * _dia[_qp];
+  }
+  else
+  {
+    _area[_qp] = _u_area;
+    _perimeter[_qp] = _u_perimeter;
+  }
 
   _u[_qp] = _flow[_qp] / _area[_qp];
   _Re[_qp] = _rho[_qp] * _dia[_qp] * fabs(_u[_qp]) / viscosity_uo.mu(_P[_qp], _T[_qp]);

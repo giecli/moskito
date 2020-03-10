@@ -21,8 +21,7 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOFLUIDWELL1P_H
-#define MOSKITOFLUIDWELL1P_H
+#pragma once
 
 #include "MoskitoFluidWellGeneral.h"
 #include "MoskitoEOS1P.h"
@@ -57,5 +56,3 @@ protected:
   MaterialProperty<Real> & _drho_dh;
 
 };
-
-#endif /* MOSKITOFLUIDWELL1P_H */

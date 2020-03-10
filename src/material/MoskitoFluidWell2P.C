@@ -91,7 +91,17 @@ MoskitoFluidWell2P::computeQpProperties()
   _cp_m[_qp]  = eos_uo.cp_m_from_p_T(fabs(_P[_qp]), _T[_qp], _vmfrac[_qp], _phase[_qp]);
 
   _dia[_qp] = _d;
-  _area[_qp] = PI * _d * _d / 4.0;
+  if (!(_area_defined*_perimeter_defined))
+  {
+    _area[_qp] = PI * _dia[_qp] * _dia[_qp] / 4.0;
+    _perimeter[_qp] = PI * _dia[_qp];
+  }
+  else
+  {
+    _area[_qp] = _u_area;
+    _perimeter[_qp] = _u_perimeter;
+  }
+
   _u[_qp] = _flow[_qp] / _area[_qp];
   _Re[_qp] = _rho_m[_qp] * _dia[_qp] * fabs(_u[_qp]) / viscosity_uo.mixture_mu(_P[_qp], _T[_qp], _vmfrac[_qp]);
 

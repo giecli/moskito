@@ -21,11 +21,9 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOFLUIDWELLGENERAL_H
-#define MOSKITOFLUIDWELLGENERAL_H
+#pragma once
 
 #include "Material.h"
-
 
 class MoskitoFluidWellGeneral;
 
@@ -49,6 +47,8 @@ protected:
   MaterialProperty<Real> & _dia;
   // Well area
   MaterialProperty<Real> & _area;
+  // Well wetted perimeter
+  MaterialProperty<Real> & _perimeter;
   // unit vector along well towards bottomhole
   MaterialProperty<RealVectorValue> & _well_dir;
   // The gravity acceleration as a vector
@@ -79,12 +79,14 @@ protected:
   Real _thickness;
   Real _d;
   Real _rel_roughness;
-  Real _f;
+  Real _u_f;
+  Real _u_area;
+  Real _u_perimeter;
   bool _f_defined;
+  bool _area_defined;
+  bool _perimeter_defined;
   MooseEnum _roughness_type;
   MooseEnum _well_direction;
   MooseEnum _well_type;
   const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };
-
-#endif /* MOSKITOFLUIDWELLGENERAL_H */

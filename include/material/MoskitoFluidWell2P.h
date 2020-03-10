@@ -21,8 +21,7 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOFLUIDWELL2P_H
-#define MOSKITOFLUIDWELL2P_H
+#pragma once
 
 #include "MoskitoFluidWellGeneral.h"
 #include "MoskitoEOS2P.h"
@@ -108,5 +107,3 @@ protected:
   const VariableGradient & _grad_h;
   const VariableGradient & _grad_p;
 };
-
-#endif /* MOSKITOFLUIDWELL2P_H */

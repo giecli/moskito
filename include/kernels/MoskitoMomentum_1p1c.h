@@ -55,14 +55,14 @@ protected:
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of mixture density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
-  // The pipe diameter
-  const MaterialProperty<Real> & _d;
   // The pipe Moody friction factor
   const MaterialProperty<Real> & _f;
   // The gravity acceleration as a vector
   const MaterialProperty<RealVectorValue> & _gravity;
   // The area of pipe
   const MaterialProperty<Real> & _area;
+  // The wetted perimeter of pipe
+  const MaterialProperty<Real> & _perimeter;
   // The unit vector of well direction
   const MaterialProperty<RealVectorValue> & _well_dir;
   // The flow direction
