@@ -21,20 +21,19 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOTIMEMOMENTUM_H
-#define MOSKITOTIMEMOMENTUM_H
+#pragma once
 
 #include "TimeKernel.h"
 
-class MoskitoTimeMomentum;
+class MoskitoTimeMomentum_1p1c;
 
 template <>
-InputParameters validParams<MoskitoTimeMomentum>();
+InputParameters validParams<MoskitoTimeMomentum_1p1c>();
 
-class MoskitoTimeMomentum : public TimeKernel
+class MoskitoTimeMomentum_1p1c : public TimeKernel
 {
 public:
-  MoskitoTimeMomentum(const InputParameters & parameters);
+  MoskitoTimeMomentum_1p1c(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -49,18 +48,14 @@ protected:
   const unsigned int _p_var_number;
   const unsigned int _h_var_number;
 
+  // The sign of well flow direction
+  const MaterialProperty<Real> & _well_sign;
   // The area of pipe
   const MaterialProperty<Real> & _area;
   // The density
   const MaterialProperty<Real> & _rho;
   // The first derivative of density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
   // The first derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
 };
-
-#endif // MOSKITOTIMEMOMENTUM_H

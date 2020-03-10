@@ -21,8 +21,7 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOENERGY_H
-#define MOSKITOENERGY_H
+#pragma once
 
 #include "Kernel.h"
 
@@ -73,5 +72,3 @@ protected:
   // The gravity acceleration as a vector
   const MaterialProperty<RealVectorValue> & _gravity;
 };
-
-#endif // MOSKITOENERGY_H

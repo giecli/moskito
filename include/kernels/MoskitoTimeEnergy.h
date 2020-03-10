@@ -21,8 +21,7 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOTIMEENERGY_H
-#define MOSKITOTIMEENERGY_H
+#pragma once
 
 #include "TimeKernel.h"
 
@@ -63,5 +62,3 @@ protected:
   // The second derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh_2;
 };
-
-#endif // MOSKITOTIMEENERGY_H

@@ -21,8 +21,7 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOTIMEMASS_H
-#define MOSKITOTIMEMASS_H
+#pragma once
 
 #include "TimeKernel.h"
 
@@ -51,5 +50,3 @@ protected:
   // The first derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
 };
-
-#endif // MOSKITOTIMEMASS_H
