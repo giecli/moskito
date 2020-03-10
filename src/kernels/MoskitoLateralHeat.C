@@ -54,6 +54,7 @@ MoskitoHeat::computeQpResidual()
   r *= ((_T[_qp]) - _Twb[_qp]);
   r /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
   r *= _test[_i][_qp];
-
+  std::cout<<" Uto = "<<_Uto[_qp]<<" T = "<<_T[_qp]<<" twb = "<<_Twb[_qp]<<std::endl;
+  std::cout<<"r = "<<r<<std::endl;
   return  r;
 }
