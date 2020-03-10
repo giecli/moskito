@@ -31,6 +31,7 @@
     enthalpy = h
     flowrate = q
     well_direction = x
+    well_type = production
     eos_uo = eos
     viscosity_uo = viscosity
     well_diameter = 0.062
@@ -98,7 +99,7 @@
     enthalpy = h
   [../]
   [./qkernel]
-    type = MoskitoMomentum
+    type = MoskitoMomentum_1p1c
     variable = q
     pressure = p
     enthalpy = h

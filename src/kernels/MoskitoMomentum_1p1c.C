@@ -21,13 +21,13 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoMomentum.h"
+#include "MoskitoMomentum_1p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoMomentum);
+registerMooseObject("MoskitoApp", MoskitoMomentum_1p1c);
 
 template <>
 InputParameters
-validParams<MoskitoMomentum>()
+validParams<MoskitoMomentum_1p1c>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -40,7 +40,7 @@ validParams<MoskitoMomentum>()
   return params;
 }
 
-MoskitoMomentum::MoskitoMomentum(const InputParameters & parameters)
+MoskitoMomentum_1p1c::MoskitoMomentum_1p1c(const InputParameters & parameters)
   : Kernel(parameters),
     _grad_p(coupledGradient("pressure")),
     _grad_h(coupledGradient("enthalpy")),
@@ -48,112 +48,80 @@ MoskitoMomentum::MoskitoMomentum(const InputParameters & parameters)
     _h_var_number(coupled("enthalpy")),
     _rho(getMaterialProperty<Real>("density")),
     _drho_dp(getMaterialProperty<Real>("drho_dp")),
-    _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
     _drho_dh(getMaterialProperty<Real>("drho_dh")),
-    _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
     _d(getMaterialProperty<Real>("well_diameter")),
     _f(getMaterialProperty<Real>("well_moody_friction")),
     _gravity(getMaterialProperty<RealVectorValue>("gravity")),
     _area(getMaterialProperty<Real>("well_area")),
     _well_dir(getMaterialProperty<RealVectorValue>("well_direction_vector")),
-    _flow_dir(getMaterialProperty<Real>("flow_direction_sign"))
+    _well_sign(getMaterialProperty<Real>("flow_direction_sign"))
 {
-  if (hasMaterialProperty<Real>("dgamma_dz"))
-  {
-    _dgamma_dz = &getMaterialProperty<Real>("dgamma_dz");
-    _dgamma_dz_uj_gphi = &getMaterialProperty<Real>("dgamma_dz_uj_gphi");
-    _dgamma_dz_uj_phi = &getMaterialProperty<Real>("dgamma_dz_uj_phi");
-    _dgamma_dz_pj_gphi = &getMaterialProperty<Real>("dgamma_dz_pj_gphi");
-    _dgamma_dz_pj_phi = &getMaterialProperty<Real>("dgamma_dz_pj_phi");
-    _dgamma_dz_hj_gphi = &getMaterialProperty<Real>("dgamma_dz_hj_gphi");
-    _dgamma_dz_hj_phi = &getMaterialProperty<Real>("dgamma_dz_hj_phi");
-    _2p_ind = true;
-  }
 }
 
 Real
-MoskitoMomentum::computeQpResidual()
+MoskitoMomentum_1p1c::computeQpResidual()
 {
   RealVectorValue r = 0.0;
 
   r += _drho_dp[_qp] * _grad_p[_qp];
   r += _drho_dh[_qp] * _grad_h[_qp];
-  r *= _flow_dir[_qp] * _u[_qp] * _u[_qp];
-  r += _flow_dir[_qp] * 2.0 * _rho[_qp] * _u[_qp] * _grad_u[_qp];
-  r += _flow_dir[_qp] * _f[_qp] * _rho[_qp] * _u[_qp] * _u[_qp]
+  r *= _u[_qp] * _u[_qp];
+  r += 2.0 * _rho[_qp] * _u[_qp] * _grad_u[_qp];
+  r += _well_sign[_qp] * _f[_qp] * _rho[_qp] * _u[_qp] * _u[_qp]
         * _well_dir[_qp] / (2.0 * _d[_qp]);
-  r /= (_area[_qp] * _area[_qp]);
-  if (_2p_ind)
-    r += (*_dgamma_dz)[_qp] * _well_dir[_qp];
-  r -= _grad_p[_qp];
-  r += _rho[_qp] * _gravity[_qp];
+  r /= _area[_qp] * _area[_qp];
+  r += _grad_p[_qp];
+  r -= _rho[_qp] * _gravity[_qp];
   r *= _test[_i][_qp];
 
   return r * _well_dir[_qp];
 }
 
 Real
-MoskitoMomentum::computeQpJacobian()
+MoskitoMomentum_1p1c::computeQpJacobian()
 {
   RealVectorValue j = 0.0;
 
   j += _drho_dp[_qp] * _grad_p[_qp];
   j += _drho_dh[_qp] * _grad_h[_qp];
-  j *= _flow_dir[_qp] * 2.0 * _phi[_j][_qp] * _u[_qp];
-  j += _flow_dir[_qp] * 2.0 * _rho[_qp] * (_phi[_j][_qp]  * _grad_u[_qp]
+  j *= 2.0 * _phi[_j][_qp] * _u[_qp];
+  j += 2.0 * _rho[_qp] * (_phi[_j][_qp]  * _grad_u[_qp]
         + _u[_qp] * _grad_phi[_j][_qp]);
-  j += _flow_dir[_qp] * _f[_qp] * _rho[_qp] * _phi[_j][_qp]
+  j += _well_sign[_qp] * _f[_qp] * _rho[_qp] * _phi[_j][_qp]
         * _u[_qp]  * _well_dir[_qp] / _d[_qp];
-  j /= (_area[_qp] * _area[_qp]);
-  if (_2p_ind)
-  {
-    j += (*_dgamma_dz_uj_phi)[_qp] * _phi[_j][_qp] * _well_dir[_qp];
-    j += (*_dgamma_dz_uj_gphi)[_qp] * _grad_phi[_j][_qp];
-  }
+  j /= _area[_qp] * _area[_qp];
   j *= _test[_i][_qp];
 
   return j * _well_dir[_qp];
 }
 
 Real
-MoskitoMomentum::computeQpOffDiagJacobian(unsigned int jvar)
+MoskitoMomentum_1p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
   RealVectorValue j = 0.0;
 
   if (jvar == _p_var_number)
   {
-    j += _drho_dp_2[_qp] * _phi[_j][_qp] * _grad_p[_qp];
     j += _drho_dp[_qp] * _grad_phi[_j][_qp];
-    j *= _flow_dir[_qp] * _u[_qp] * _u[_qp];
-    j += _flow_dir[_qp] * 2.0 * _drho_dp[_qp] * _phi[_j][_qp] * _u[_qp] * _grad_u[_qp];
-    j += _flow_dir[_qp] * _f[_qp] * _drho_dp[_qp] * _phi[_j][_qp] * _u[_qp]
+    j *= _u[_qp] * _u[_qp];
+    j += 2.0 * _drho_dp[_qp] * _phi[_j][_qp] * _u[_qp] * _grad_u[_qp];
+    j += _well_sign[_qp] * _f[_qp] * _drho_dp[_qp] * _phi[_j][_qp] * _u[_qp]
           * _u[_qp] * _well_dir[_qp] / (2.0 * _d[_qp]);
-    j /= (_area[_qp] * _area[_qp]);
-    j -= _grad_phi[_j][_qp];
-    j += _drho_dp[_qp] * _phi[_j][_qp] * _gravity[_qp];
-    if (_2p_ind)
-    {
-      j += (*_dgamma_dz_pj_phi)[_qp] * _phi[_j][_qp] * _well_dir[_qp];
-      j += (*_dgamma_dz_pj_gphi)[_qp] * _grad_phi[_j][_qp];
-    }
+    j /= _area[_qp] * _area[_qp];
+    j += _grad_phi[_j][_qp];
+    j -= _drho_dp[_qp] * _phi[_j][_qp] * _gravity[_qp];
     j *= _test[_i][_qp];
   }
 
   if (jvar == _h_var_number)
   {
-    j += _drho_dh_2[_qp] * _phi[_j][_qp] * _grad_h[_qp];
     j += _drho_dh[_qp] * _grad_phi[_j][_qp];
-    j *= _flow_dir[_qp] * _u[_qp] * _u[_qp];
-    j += _flow_dir[_qp] * 2.0 * _drho_dh[_qp] * _phi[_j][_qp] * _u[_qp] * _grad_u[_qp];
-    j += _flow_dir[_qp] * _f[_qp] * _drho_dh[_qp] * _phi[_j][_qp] * _u[_qp]
+    j *= _u[_qp] * _u[_qp];
+    j += 2.0 * _drho_dh[_qp] * _phi[_j][_qp] * _u[_qp] * _grad_u[_qp];
+    j += _well_sign[_qp] * _f[_qp] * _drho_dh[_qp] * _phi[_j][_qp] * _u[_qp]
           * _u[_qp] * _well_dir[_qp] / (2.0 * _d[_qp]);
-    j /= (_area[_qp] * _area[_qp]);
-    j += _drho_dh[_qp] * _phi[_j][_qp] * _gravity[_qp];
-    if (_2p_ind)
-    {
-      j += (*_dgamma_dz_hj_phi)[_qp] * _phi[_j][_qp] * _well_dir[_qp];
-      j += (*_dgamma_dz_hj_gphi)[_qp] * _grad_phi[_j][_qp];
-    }
+    j /= _area[_qp] * _area[_qp];
+    j -= _drho_dh[_qp] * _phi[_j][_qp] * _gravity[_qp];
     j *= _test[_i][_qp];
   }
 

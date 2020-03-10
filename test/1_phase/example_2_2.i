@@ -13,6 +13,7 @@
     type = MoskitoEOS1P_IdealFluid
     bulk_modulus = 2e+012
     reference_density = 883
+    reference_enthalpy = 0
   [../]
   [./viscosity]
     type = MoskitoViscosityConst
@@ -27,6 +28,7 @@
     enthalpy = h
     flowrate = q
     well_direction = x
+    well_type = injection
     eos_uo = eos
     viscosity_uo = viscosity
     well_diameter = 0.1016
@@ -46,7 +48,7 @@
     type = DirichletBC
     variable = q
     boundary = left
-    value = -0.00223
+    value = 0.00223
   [../]
 []
 
@@ -58,7 +60,7 @@
   [../]
   [./q]
     scaling = 1e-5
-    initial_condition = -0.00223
+    initial_condition = 0.00223
   [../]
 []
 
@@ -74,7 +76,7 @@
     enthalpy = h
   [../]
   [./qkernel]
-    type = MoskitoMomentum
+    type = MoskitoMomentum_1p1c
     variable = q
     pressure = p
     enthalpy = h
