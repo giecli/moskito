@@ -22,6 +22,7 @@
   [./eos]
     type = MoskitoEOS1P_IdealFluid
     bulk_modulus = 2e+012
+    reference_temperature = 293.15
     reference_enthalpy = 0
     reference_density = 1000
   [../]
@@ -35,7 +36,7 @@
   [./area0]
     type = MoskitoFluidWell1P
     pressure = p
-    enthalpy = h
+    temperature = T
     flowrate = q
     well_direction = x
     well_type = injection
@@ -65,8 +66,8 @@
 []
 
 [Variables]
-  [./h]
-    initial_condition = 0
+  [./T]
+    initial_condition = 293.15
   [../]
   [./p]
     initial_condition = 2.07e6
@@ -78,21 +79,21 @@
 []
 
 [Kernels]
-  [./hkernel]
+  [./Tkernel]
     type = NullKernel
-    variable = h
+    variable = T
   [../]
   [./pkernel]
     type = MoskitoMass_1p1c
     variable = p
     flowrate = q
-    enthalpy = h
+    temperature = T
   [../]
   [./qkernel]
     type = MoskitoMomentum_1p1c
     variable = q
     pressure = p
-    enthalpy = h
+    temperature = T
   [../]
 []
 

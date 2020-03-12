@@ -31,7 +31,7 @@ validParams<MoskitoTimeMass_1p1c>()
 {
   InputParameters params = validParams<TimeKernel>();
 
-  params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable");
+  params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable");
   params.addClassDescription("Time derivative part of mass conservation equation for "
                   "1 phase (either liquid or gas) pipe flow and it returns pressure");
 
@@ -40,11 +40,11 @@ validParams<MoskitoTimeMass_1p1c>()
 
 MoskitoTimeMass_1p1c::MoskitoTimeMass_1p1c(const InputParameters & parameters)
   : TimeKernel(parameters),
-    _h_dot(coupledDot("enthalpy")),
-    _dh_dot(coupledDotDu("enthalpy")),
-    _h_var_number(coupled("enthalpy")),
+    _T_dot(coupledDot("temperature")),
+    _dT_dot(coupledDotDu("temperature")),
+    _T_var_number(coupled("temperature")),
     _drho_dp(getMaterialProperty<Real>("drho_dp")),
-    _drho_dh(getMaterialProperty<Real>("drho_dh"))
+    _drho_dT(getMaterialProperty<Real>("drho_dT"))
 {
 }
 
@@ -54,7 +54,7 @@ MoskitoTimeMass_1p1c::computeQpResidual()
   Real r = 0.0;
 
   r += _drho_dp[_qp] * _u_dot[_qp];
-  r += _drho_dh[_qp] * _h_dot[_qp];
+  r += _drho_dT[_qp] * _T_dot[_qp];
   r *= _test[_i][_qp];
 
   return r;
@@ -76,9 +76,9 @@ MoskitoTimeMass_1p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real j = 0.0;
 
-  if (jvar == _h_var_number)
+  if (jvar == _T_var_number)
   {
-    j += _drho_dh[_qp] * _phi[_j][_qp] * _dh_dot[_qp];
+    j += _drho_dT[_qp] * _phi[_j][_qp] * _dT_dot[_qp];
     j *= _test[_i][_qp];
   }
 

@@ -31,7 +31,6 @@ validParams<MoskitoFluidWellGeneral>()
 
   params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable (Pa)");
   params.addRequiredCoupledVar("flowrate", "Mixture flow rate nonlinear variable (m^3/s)");
-  params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable (J/kg)");
   params.addParam<RealVectorValue>("gravity", RealVectorValue(0.0,0.0,0.0),
                                         "The gravity acceleration as a vector");
   params.addParam<Real>("casing_thermal_conductivity", 0.0, "Thermal conductivity of casing");
@@ -56,8 +55,8 @@ validParams<MoskitoFluidWellGeneral>()
       "well_direction", WD, "Well dominent direction towards bottom hole [x, -x, y, -y, z, -z].");
 
   MooseEnum WT("production=-1 injection=1");
-      params.addRequiredParam<MooseEnum>(
-          "well_type", WT, "production or injection");
+  params.addRequiredParam<MooseEnum>(
+      "well_type", WT, "production or injection");
 
   return params;
 }
@@ -72,10 +71,8 @@ MoskitoFluidWellGeneral::MoskitoFluidWellGeneral(const InputParameters & paramet
     _perimeter(declareProperty<Real>("well_perimeter")),
     _well_dir(declareProperty<RealVectorValue>("well_direction_vector")),
     _gravity(declareProperty<RealVectorValue>("gravity")),
-    _T(declareProperty<Real>("temperature")),
     _lambda(declareProperty<Real>("thermal_conductivity")),
     _well_sign(declareProperty<Real>("flow_direction_sign")),
-    _h(coupledValue("enthalpy")),
     _P(coupledValue("pressure")),
     _flow(coupledValue("flowrate")),
     _g(getParam<RealVectorValue>("gravity")),

@@ -67,7 +67,9 @@ protected:
   // The first derivative of density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
+  const MaterialProperty<Real> & _drho_dT;
+  // Enthalpy from P and T
+  const MaterialProperty<Real> & _h;
 
   // The gravity acceleration as a vector
   const MaterialProperty<RealVectorValue> & _gravity;

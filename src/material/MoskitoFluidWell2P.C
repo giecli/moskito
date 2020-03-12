@@ -30,6 +30,7 @@ InputParameters
 validParams<MoskitoFluidWell2P>()
 {
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
+  params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable (J/kg)");
   params.addRequiredParam<UserObjectName>("eos_uo",
         "The name of the userobject for 2 phase EOS");
   params.addRequiredParam<UserObjectName>("viscosity_uo",
@@ -44,6 +45,7 @@ MoskitoFluidWell2P::MoskitoFluidWell2P(const InputParameters & parameters)
     eos_uo(getUserObject<MoskitoEOS2P>("eos_uo")),
     viscosity_uo(getUserObject<MoskitoViscosity2P>("viscosity_uo")),
     dfm_uo(getUserObject<MoskitoDriftFlux>("drift_flux_uo")),
+    _T(declareProperty<Real>("temperature")),
     _cp_m(declareProperty<Real>("specific_heat")),
     _rho_g(declareProperty<Real>("gas_density")),
     _rho_l(declareProperty<Real>("liquid_density")),
@@ -71,6 +73,7 @@ MoskitoFluidWell2P::MoskitoFluidWell2P(const InputParameters & parameters)
     _dgamma_dz_pj_phi(declareProperty<Real>("dgamma_dz_pj_phi")),
     _dgamma_dz_hj_gphi(declareProperty<Real>("dgamma_dz_hj_gphi")),
     _dgamma_dz_hj_phi(declareProperty<Real>("dgamma_dz_hj_phi")),
+    _h(coupledValue("enthalpy")),
     _grad_flow(coupledGradient("flowrate")),
     _grad_h(coupledGradient("enthalpy")),
     _grad_p(coupledGradient("pressure"))

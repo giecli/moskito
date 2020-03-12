@@ -48,6 +48,8 @@ protected:
   // Userobject to Drift Fluc model
   const MoskitoDriftFlux & dfm_uo;
 
+  // temperature
+  MaterialProperty<Real> & _T;
   // The specific heat of mixture at constant pressure
   MaterialProperty<Real> & _cp_m;
   // Density of gas
@@ -101,6 +103,9 @@ protected:
   // diagonal jacobian of the residual wrt hj for dgamma_dz in the momentum conservation
   MaterialProperty<Real> & _dgamma_dz_hj_gphi;
   MaterialProperty<Real> & _dgamma_dz_hj_phi;
+
+  // The coupled enthalpy
+  const VariableValue & _h;
 
   // The gradient of the coupled variables
   const VariableGradient & _grad_flow;

@@ -44,6 +44,12 @@ MoskitoEOS1P_FPModule::MoskitoEOS1P_FPModule(const InputParameters & parameters)
 }
 
 Real
+MoskitoEOS1P_FPModule::h_from_p_T(const Real & pressure, const Real & temperature) const
+{
+  return _fp_eos.h_from_p_T(pressure, temperature);
+}
+
+Real
 MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature) const
 {
   return _fp_eos.rho_from_p_T(pressure, temperature);
@@ -54,18 +60,6 @@ MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperat
                             Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   _fp_eos.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-}
-
-Real
-MoskitoEOS1P_FPModule::h_to_T(const Real & pressure, const Real & enthalpy) const
-{
-  return enthalpy / cp(pressure, 273.15);
-}
-
-Real
-MoskitoEOS1P_FPModule::T_to_h(const Real & pressure, const Real & temperature) const
-{
-  return cp(pressure, temperature) * temperature;
 }
 
 Real

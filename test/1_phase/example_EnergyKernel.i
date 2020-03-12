@@ -1,8 +1,4 @@
-# Over-all heat transfer coefficients in Steam and hot water injection wells
-# Willhite, G. P. 19
-# Appendix: Sample Calculation - Results of Uto differs slighly, because of rounding of the author
 
-# Example has a lenght that is not of importance
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -13,7 +9,7 @@
 
 [UserObjects]
   [./eos]
-    type = MoskitoEOS1P_PureWater
+    type = MoskitoEOS1P_IdealFluid
   [../]
   [./viscosity]
     type = MoskitoViscosityWaterSmith
@@ -24,7 +20,7 @@
   [./area0]
     type = MoskitoFluidWell1P
     pressure = p
-    enthalpy = h
+    temperature = T
     flowrate = q
     well_type = production
     well_direction = x
@@ -32,15 +28,13 @@
     eos_uo = eos
     viscosity_uo = viscosity
     roughness_type = smooth
-    gravity = '0.0 0 0'
-    outputs = exodus
-    output_properties = 'temperature'
+    gravity = '10.0 0 0'
   [../]
 []
 
 [Variables]
-  [./h]
-    initial_condition = 3000000
+  [./T]
+    initial_condition = 300
   [../]
   [./p]
     initial_condition = 1.0e6
@@ -53,16 +47,16 @@
 [BCs]
   [./hbc_top]
     type = DirichletBC
-    variable = h
-    boundary = right
-    value = 3000000
+    variable = T
+    boundary = left
+    value = 300
   [../]
 [../]
 
 [Kernels]
   [./hkernel]
     type = MoskitoEnergy_1p1c
-    variable = h
+    variable = T
     pressure = p
     flowrate = q
   [../]
@@ -77,22 +71,27 @@
 []
 
 [Preconditioning]
-  active = p1
+  active = pn1
   [./p1]
     type = SMP
     full = true
-    #petsc_options = '-snes_ksp_ew'
-    petsc_options_iname = '-pc_type -pc_hypre_type -snes_type -snes_linesearch_type -sub_pc_factor_shift_type'
-    petsc_options_value = 'hypre boomeramg newtonls basic NONZERO'
+    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
+    petsc_options_value = ' bjacobi  ilu          NONZERO                 '
+  [../]
+  [./pn1]
+    type = SMP
+    full = true
+    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -snes_type -snes_linesearch_type'
+    petsc_options_value = ' bjacobi  ilu          NONZERO                   newtonls   basic               '
   [../]
 []
 
 [Executioner]
   type = Steady
-  l_max_its = 2
-  nl_rel_tol = 1e-4
-  nl_abs_tol = 1e-4
+  l_max_its = 50
   nl_max_its = 50
+  l_tol = 1e-8
+  nl_rel_tol = 1e-8
   solve_type = NEWTON
 []
 

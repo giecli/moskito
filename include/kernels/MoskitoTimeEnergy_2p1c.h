@@ -21,36 +21,40 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoTemperatureToEnthalpy1P.h"
+#pragma once
 
-registerMooseObject("MoskitoApp", MoskitoTemperatureToEnthalpy1P);
+#include "TimeKernel.h"
+
+class MoskitoTimeEnergy_2p1c;
 
 template <>
-InputParameters
-validParams<MoskitoTemperatureToEnthalpy1P>()
-{
-  InputParameters params = validParams<NodalBC>();
-  params.addRequiredParam<UserObjectName>("eos_uo",
-        "The name of the userobject for EOS");
-  params.addRequiredParam<Real>("temperature", "Temperature value of the BC");
-  params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable (Pa)");
-  params.declareControllable("temperature");
-  params.addClassDescription("Implements a NodalBC (Dirichlet) which calculates "
-                            "specific enthalpy using temperature based on EOS "
-                            " for 1 phase flow");
-  return params;
-}
+InputParameters validParams<MoskitoTimeEnergy_2p1c>();
 
-MoskitoTemperatureToEnthalpy1P::MoskitoTemperatureToEnthalpy1P(const InputParameters & parameters)
-  : NodalBC(parameters),
-    _T(getParam<Real>("temperature")),
-    _p(coupledValue("pressure")),
-    _eos_uo(getUserObject<MoskitoEOS1P>("eos_uo"))
+class MoskitoTimeEnergy_2p1c : public TimeKernel
 {
-}
+public:
+  MoskitoTimeEnergy_2p1c(const InputParameters & parameters);
 
-Real
-MoskitoTemperatureToEnthalpy1P::computeQpResidual()
-{
-  return _u[_qp] - _eos_uo.T_to_h(_p[_qp], _T);
-}
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  // required values for pressure and flowrate coupling
+  const VariableValue & _q;
+  const VariableValue & _p_dot;
+  const VariableValue & _q_dot;
+  const VariableValue & _dp_dot;
+  const VariableValue & _dq_dot;
+  const unsigned int _p_var_number;
+  const unsigned int _q_var_number;
+
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh;
+};

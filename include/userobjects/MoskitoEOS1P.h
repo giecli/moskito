@@ -40,6 +40,9 @@ public:
   virtual void initialize() final {}
   virtual void finalize() final {}
 
+  // specific enthalpy from pressure and temperature
+  virtual Real h_from_p_T(const Real & pressure, const Real & temperature) const;
+
   // Density from pressure and temperature (kg/m^3)
   virtual Real rho_from_p_T(const Real & pressure, const Real & temperature) const = 0;
 
@@ -47,15 +50,15 @@ public:
   virtual void rho_from_p_T(const Real & pressure, const Real & temperature,
                         Real & rho, Real & drho_dp, Real & drho_dT) const = 0;
 
-  // The conversion function from temperature to specific enthalpy
-  virtual Real T_to_h(const Real & pressure, const Real & temperature) const = 0;
-
-  // The conversion function from specific enthalpy to temperature
-  virtual Real h_to_T(const Real & pressure, const Real & enthalpy) const = 0;
-
   // specific heat at constant pressure from temperature
   virtual Real cp(const Real & pressure, const Real & temperature) const = 0;
 
   // thermal conductivity from pressure and temperature
   virtual Real lambda(const Real & pressure, const Real & temperature) const = 0;
+
+protected:
+  bool _cp_linear = 1;
+  Real _deltaT = 20.0;
+  Real _T_ref = 273.15;
+  Real _h_ref = 0.0;
 };

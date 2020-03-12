@@ -53,8 +53,12 @@ protected:
   const MaterialProperty<Real> & _area;
   // The density
   const MaterialProperty<Real> & _rho;
+  // Enthalpy from P and T
+  const MaterialProperty<Real> & _h;
+  // The specific heat at constant pressure
+  const MaterialProperty<Real> & _cp;
   // The first derivative of density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
+  const MaterialProperty<Real> & _drho_dT;
 };

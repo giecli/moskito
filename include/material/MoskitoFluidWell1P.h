@@ -52,7 +52,9 @@ protected:
   MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt temperature
   MaterialProperty<Real> & _drho_dT;
-  // The first derivative of density wrt enthalpy
-  MaterialProperty<Real> & _drho_dh;
+  // Enthalpy from P and T
+  MaterialProperty<Real> & _h;
 
+  // The coupled temperature
+  const VariableValue & _T;
 };

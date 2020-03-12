@@ -53,15 +53,11 @@ protected:
   MaterialProperty<RealVectorValue> & _well_dir;
   // The gravity acceleration as a vector
   MaterialProperty<RealVectorValue> & _gravity;
-  // temperature
-  MaterialProperty<Real> & _T;
   // thermal conductivity of casing and fluid
   MaterialProperty<Real> & _lambda;
   // Direction of flow, the positive sign is production and vice versa
   MaterialProperty<Real> & _well_sign;
 
-  // The coupled enthalpy
-  const VariableValue & _h;
   // The coupled pressure
   const VariableValue & _P;
   // The coupled flow rate
