@@ -93,6 +93,7 @@
   l_tol = 1e-8
   nl_rel_tol = 1e-8
   solve_type = NEWTON
+  nl_abs_tol = 1e-7
 []
 
 [Outputs]
