@@ -1,23 +1,23 @@
 [Tests]
-  [./Pressure_Straight_Pipeline]
+  [./Hydraulics_Gravity_Check]
     type = 'Exodiff'
     input = 'example_2_1.i'
     exodiff = 'example_2_1_out.e'
   [../]
-  [./Pressure_Hilly_Terrain_Pipeline]
+  [./Hydraulics_Friction_Check]
     type = 'Exodiff'
     input = 'example_2_2.i'
     exodiff = 'example_2_2_out.e'
   [../]
-  [./Pressure_Compressible_Gas_Well]
+  [./Hydraulics_Compressibillity_Check]
     type = 'Exodiff'
     input = 'example_2_3.i'
     exodiff = 'example_2_3_out.e'
   [../]
-  [./Energy_Kernel]
+  [./All_Kernel_Check]
     type = 'Exodiff'
-    input = 'example_EnergyKernel.i'
-    exodiff = 'example_EnergyKernel_out.e'
+    input = 'transient.i'
+    exodiff = 'transient_out.e'
   [../]
   [./Lateral_Heat_Calculation_Uto]
     type = 'Exodiff'

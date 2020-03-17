@@ -29,44 +29,81 @@
     viscosity_uo = viscosity
     roughness_type = smooth
     gravity = '10.0 0 0'
+    output_properties = 'density well_velocity'
+    outputs = exodus
   [../]
 []
 
 [Variables]
   [./T]
-    initial_condition = 300
+    initial_condition = 320
   [../]
   [./p]
-    initial_condition = 1.0e6
+    [./InitialCondition]
+      type = FunctionIC
+      function = '2e6'
+    [../]
   [../]
   [./q]
-    initial_condition = 0.01
   [../]
 []
 
 [BCs]
-  [./hbc_top]
+  [./Tbc_top]
     type = DirichletBC
     variable = T
+    boundary = right
+    value = 400
+  [../]
+  [./pbc]
+    type = DirichletBC
+    variable = p
     boundary = left
-    value = 300
+    value = '2e6'
+  [../]
+  [./qbc]
+    type = FunctionDirichletBC
+    variable = q
+    boundary = left
+    function = 'if(t>20,0.01,0.00001)'
   [../]
 [../]
 
 [Kernels]
-  [./hkernel]
+  [./Tkernel]
     type = MoskitoEnergy_1p1c
     variable = T
     pressure = p
     flowrate = q
   [../]
-  [./pkernel1]
-    type = NullKernel
-    variable = p
+  [./Ttimekernel]
+    type = MoskitoTimeEnergy_1p1c
+    variable = T
+    pressure = p
+    flowrate = q
   [../]
-  [./qkernel1]
-    type = NullKernel
+  [./pkernel]
+    type = MoskitoMass_1p1c
+    variable = p
+    flowrate = q
+    temperature = T
+  [../]
+  [./ptimekernel]
+    type = MoskitoTimeMass_1p1c
+    variable = p
+    temperature = T
+  [../]
+  [./qkernel]
+    type = MoskitoMomentum_1p1c
     variable = q
+    pressure = p
+    temperature = T
+  [../]
+  [./qtimekernel]
+    type = MoskitoTimeMomentum_1p1c
+    variable = q
+    pressure = p
+    temperature = T
   [../]
 []
 
@@ -87,13 +124,15 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  dt = 1
+  end_time = 120
   l_max_its = 50
   nl_max_its = 50
   l_tol = 1e-8
   nl_rel_tol = 1e-8
   solve_type = NEWTON
-  nl_abs_tol = 1e-7
+  automatic_scaling = true
 []
 
 [Outputs]
