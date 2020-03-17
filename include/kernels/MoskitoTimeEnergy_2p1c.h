@@ -21,39 +21,40 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoHeat.h"
+#pragma once
 
-registerMooseObject("MoskitoApp", MoskitoHeat);
+#include "TimeKernel.h"
+
+class MoskitoTimeEnergy_2p1c;
 
 template <>
-InputParameters
-validParams<MoskitoHeat>()
+InputParameters validParams<MoskitoTimeEnergy_2p1c>();
+
+class MoskitoTimeEnergy_2p1c : public TimeKernel
 {
-  InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Lateral heat exchange between wellbore "
-        "and formation including tubing (mandatory), insulation, liquid filled "
-        "annulus and cementation");
-  return params;
-}
+public:
+  MoskitoTimeEnergy_2p1c(const InputParameters & parameters);
 
-MoskitoHeat::MoskitoHeat(const InputParameters & parameters)
-  : Kernel(parameters),
-  _T(getMaterialProperty<Real>("temperature")),
-  _rto(getMaterialProperty<Real>("radius_tubbing_outer")),
-  _Uto(getMaterialProperty<Real>("thermal_resistivity_well")),
-  _Twb(getMaterialProperty<Real>("temperature_well_formation_interface")),
-  _diameter_liquid(getMaterialProperty<Real>("well_diameter"))
-  {
-  }
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-Real
-MoskitoHeat::computeQpResidual()
-{
-  Real r = 0.0;
-  r =  2.0 * PI * _rto[_qp] * _Uto[_qp];
-  r *= ((_T[_qp]) - _Twb[_qp]);
-  r /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
-  r *= _test[_i][_qp];
+  // required values for pressure and flowrate coupling
+  const VariableValue & _q;
+  const VariableValue & _p_dot;
+  const VariableValue & _q_dot;
+  const VariableValue & _dp_dot;
+  const VariableValue & _dq_dot;
+  const unsigned int _p_var_number;
+  const unsigned int _q_var_number;
 
-  return  r;
-}
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh;
+};

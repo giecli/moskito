@@ -21,9 +21,6 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOLATHEATITERATIONXIONGSI_H
-#define MOSKITOLATHEATITERATIONXIONGSI_H
-
 #pragma once
 
 #include "Material.h"
@@ -166,5 +163,3 @@ protected:
   const Real Rankine_absol = 491.67;
 
 };
-
-#endif

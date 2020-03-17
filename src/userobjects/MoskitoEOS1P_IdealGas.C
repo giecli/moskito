@@ -32,8 +32,8 @@ validParams<MoskitoEOS1P_IdealGas>()
   InputParameters params = validParams<MoskitoEOS1P>();
 
   params.addRequiredParam<Real>("molar_mass", "Molar mass of the gas (kg/mol)");
-  params.addParam<Real>("specific_heat", 1.005e3,
-        "Constant specific heat capacity at constant pressure (J/kg/K)");
+  params.addRequiredParam<Real>("specific_heat",
+        "Specific heat capacity at constant volume (J/mol/K)");
 
   return params;
 }
@@ -45,6 +45,10 @@ MoskitoEOS1P_IdealGas::MoskitoEOS1P_IdealGas(const InputParameters & parameters)
     _molar_mass(getParam<Real>("molar_mass")),
     _R(8.3144598)
 {
+  _cp += _R;
+  _cp /= _molar_mass;
+  _T_ref = 0.0;
+  _h_ref = 0.0;
 }
 
 Real
@@ -60,18 +64,6 @@ MoskitoEOS1P_IdealGas::rho_from_p_T(const Real & pressure, const Real & temperat
   rho = this->rho_from_p_T(pressure, temperature);
   drho_dp = _molar_mass / (_R * temperature);
   drho_dT = -pressure * _molar_mass / (_R * temperature * temperature);
-}
-
-Real
-MoskitoEOS1P_IdealGas::h_to_T(const Real & pressure, const Real & enthalpy) const
-{
-  return enthalpy / _cp;
-}
-
-Real
-MoskitoEOS1P_IdealGas::T_to_h(const Real & pressure, const Real & temperature) const
-{
-  return cp(pressure, temperature) * temperature;
 }
 
 Real

@@ -21,32 +21,47 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOTEMPERATURETOENTHALPY1P_H
-#define MOSKITOTEMPERATURETOENTHALPY1P_H
+#pragma once
 
-#include "NodalBC.h"
-#include "MoskitoEOS1P.h"
+#include "Kernel.h"
 
-class MoskitoTemperatureToEnthalpy1P;
+class MoskitoMass_1p1c;
 
 template <>
-InputParameters validParams<MoskitoTemperatureToEnthalpy1P>();
+InputParameters validParams<MoskitoMass_1p1c>();
 
-class MoskitoTemperatureToEnthalpy1P : public NodalBC
+class MoskitoMass_1p1c : public Kernel
 {
 public:
-  MoskitoTemperatureToEnthalpy1P(const InputParameters & parameters);
+  MoskitoMass_1p1c(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // temperature value
-  const Real & _T;
-  // presure value
-  const VariableValue & _p;
+  // The coupled flow_rate
+  const VariableValue & _q;
 
-  // Userobject to equation of state
-  const MoskitoEOS1P & _eos_uo;
+  // The gradient of the coupled flow_rate
+  const VariableGradient & _grad_q;
+  // The gradient of the coupled temperature
+  const VariableGradient & _grad_T;
+
+  // Variable numberings
+  unsigned _q_var_number;
+  unsigned _T_var_number;
+
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The unit vector of well direction
+  const MaterialProperty<RealVectorValue> & _well_dir;
+  // The sign of well flow direction
+  const MaterialProperty<Real> & _well_sign;
+  // The density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt temperature
+  const MaterialProperty<Real> & _drho_dT;
 };
-
-#endif // MOSKITOTEMPERATURETOENTHALPY1P_H

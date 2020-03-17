@@ -24,26 +24,25 @@
 #pragma once
 
 #include "MoskitoEOS1P.h"
-#include "MoskitoWater97FluidProperties.h"
 
-class MoskitoEOS1P_PureWater;
+class MoskitoEOS1P_Brine;
 
 template <>
-InputParameters validParams<MoskitoEOS1P_PureWater>();
+InputParameters validParams<MoskitoEOS1P_Brine>();
 
-class MoskitoEOS1P_PureWater : public MoskitoEOS1P
+class MoskitoEOS1P_Brine : public MoskitoEOS1P
 {
 public:
-  MoskitoEOS1P_PureWater(const InputParameters & parameters);
+  MoskitoEOS1P_Brine(const InputParameters & parameters);
 
   virtual Real rho_from_p_T(const Real & pressure, const Real & temperature) const override;
   virtual void rho_from_p_T(const Real & pressure, const Real & temperature,
                         Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  virtual Real T_to_h(const Real & pressure, const Real & temperature) const override;
-  virtual Real h_to_T(const Real & pressure, const Real & enthalpy) const override;
   virtual Real cp(const Real & pressure, const Real & temperature) const override;
   virtual Real lambda(const Real & pressure, const Real & temperature) const override;
 
 protected:
-  MoskitoWater97FluidProperties * _eos_1P;
+  const Real _cp;
+  const Real _lambda;
+  const Real _m;
 };

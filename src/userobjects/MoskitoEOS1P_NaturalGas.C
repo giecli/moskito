@@ -49,6 +49,9 @@ MoskitoEOS1P_NaturalGas::MoskitoEOS1P_NaturalGas(const InputParameters & paramet
     _lambda(0.0)
 {
   Pseudo_Critical_Calc(_gamma_g);
+  // should be checked later for a nonlinear cp
+  _T_ref = 0.0;
+  _h_ref = 0.0;
 }
 
 Real
@@ -76,18 +79,6 @@ MoskitoEOS1P_NaturalGas::rho_from_p_T(const Real & pressure, const Real & temper
   h = 0.0001 * temperature;
   dz_dT = (z_factor(pressure, temperature + h) - z_factor(pressure, temperature - h)) / (2.0 * h);
   drho_dT  = - rho * (dz_dT / z + 1.0 / temperature);
-}
-
-Real
-MoskitoEOS1P_NaturalGas::h_to_T(const Real & pressure, const Real & enthalpy) const
-{
-  return enthalpy / _cp;
-}
-
-Real
-MoskitoEOS1P_NaturalGas::T_to_h(const Real & pressure, const Real & temperature) const
-{
-  return cp(pressure, temperature) * temperature;
 }
 
 Real

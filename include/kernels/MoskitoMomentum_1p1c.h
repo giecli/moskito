@@ -21,55 +21,50 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoEOS1P_FPModule.h"
+#pragma once
 
-registerMooseObject("MoskitoApp", MoskitoEOS1P_FPModule);
+#include "Kernel.h"
+
+class MoskitoMomentum_1p1c;
 
 template <>
-InputParameters
-validParams<MoskitoEOS1P_FPModule>()
+InputParameters validParams<MoskitoMomentum_1p1c>();
+
+class MoskitoMomentum_1p1c : public Kernel
 {
-  InputParameters params = validParams<MoskitoEOS1P>();
+public:
+  MoskitoMomentum_1p1c(const InputParameters & parameters);
 
-  params.addRequiredParam<UserObjectName>("SinglePhase_fp",
-          "The name of the FluidProperties UserObject");
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  return params;
-}
+  // The gradient of the coupled pressure
+  const VariableGradient & _grad_p;
+  // The gradient of the coupled temperature
+  const VariableGradient & _grad_T;
 
-MoskitoEOS1P_FPModule::MoskitoEOS1P_FPModule(const InputParameters & parameters)
-  : MoskitoEOS1P(parameters),
-    _fp_eos(getUserObject<SinglePhaseFluidProperties>("SinglePhase_fp"))
-{
-}
+  // Variable numberings
+  unsigned _p_var_number;
+  unsigned _T_var_number;
 
-Real
-MoskitoEOS1P_FPModule::h_from_p_T(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.h_from_p_T(pressure, temperature);
-}
-
-Real
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.rho_from_p_T(pressure, temperature);
-}
-
-void
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature,
-                            Real & rho, Real & drho_dp, Real & drho_dT) const
-{
-  _fp_eos.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-}
-
-Real
-MoskitoEOS1P_FPModule::cp(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.cp_from_p_T(pressure, temperature);
-}
-
-Real
-MoskitoEOS1P_FPModule::lambda(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.k_from_p_T(pressure, temperature);
-}
+  // The mixture density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of mixture density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of mixture density wrt temperature
+  const MaterialProperty<Real> & _drho_dT;
+  // The pipe Moody friction factor
+  const MaterialProperty<Real> & _f;
+  // The gravity acceleration as a vector
+  const MaterialProperty<RealVectorValue> & _gravity;
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The wetted perimeter of pipe
+  const MaterialProperty<Real> & _perimeter;
+  // The unit vector of well direction
+  const MaterialProperty<RealVectorValue> & _well_dir;
+  // The flow direction
+  const MaterialProperty<Real> & _well_sign;
+};

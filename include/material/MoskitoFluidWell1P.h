@@ -21,8 +21,7 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOFLUIDWELL1P_H
-#define MOSKITOFLUIDWELL1P_H
+#pragma once
 
 #include "MoskitoFluidWellGeneral.h"
 #include "MoskitoEOS1P.h"
@@ -51,15 +50,11 @@ protected:
   MaterialProperty<Real> & _rho;
   // The first derivative of density wrt pressure
   MaterialProperty<Real> & _drho_dp;
-  // The second derivative of density wrt pressure
-  MaterialProperty<Real> & _drho_dp_2;
   // The first derivative of density wrt temperature
   MaterialProperty<Real> & _drho_dT;
-  // The first derivative of density wrt enthalpy
-  MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt enthalpy
-  MaterialProperty<Real> & _drho_dh_2;
+  // Enthalpy from P and T
+  MaterialProperty<Real> & _h;
 
+  // The coupled temperature
+  const VariableValue & _T;
 };
-
-#endif /* MOSKITOFLUIDWELL1P_H */

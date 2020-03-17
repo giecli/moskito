@@ -21,8 +21,7 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOFLUIDWELL2P_H
-#define MOSKITOFLUIDWELL2P_H
+#pragma once
 
 #include "MoskitoFluidWellGeneral.h"
 #include "MoskitoEOS2P.h"
@@ -49,6 +48,8 @@ protected:
   // Userobject to Drift Fluc model
   const MoskitoDriftFlux & dfm_uo;
 
+  // temperature
+  MaterialProperty<Real> & _T;
   // The specific heat of mixture at constant pressure
   MaterialProperty<Real> & _cp_m;
   // Density of gas
@@ -103,10 +104,11 @@ protected:
   MaterialProperty<Real> & _dgamma_dz_hj_gphi;
   MaterialProperty<Real> & _dgamma_dz_hj_phi;
 
+  // The coupled enthalpy
+  const VariableValue & _h;
+
   // The gradient of the coupled variables
   const VariableGradient & _grad_flow;
   const VariableGradient & _grad_h;
   const VariableGradient & _grad_p;
 };
-
-#endif /* MOSKITOFLUIDWELL2P_H */

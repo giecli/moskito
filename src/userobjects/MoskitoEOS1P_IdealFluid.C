@@ -55,15 +55,15 @@ validParams<MoskitoEOS1P_IdealFluid>()
 MoskitoEOS1P_IdealFluid::MoskitoEOS1P_IdealFluid(const InputParameters & parameters)
   : MoskitoEOS1P(parameters),
     _rho_ref(getParam<Real>("reference_density")),
-    _T_ref(getParam<Real>("reference_temperature")),
     _P_ref(getParam<Real>("reference_pressure")),
-    _h_ref(getParam<Real>("reference_enthalpy")),
     _cp(getParam<Real>("specific_heat")),
     _lambda(getParam<Real>("thermal_conductivity")),
     _thermal_expansion_0(getParam<Real>("thermal_expansion_0")),
     _thermal_expansion_1(getParam<Real>("thermal_expansion_1")),
     _bulk_modulus(getParam<Real>("bulk_modulus"))
 {
+  _T_ref = getParam<Real>("reference_temperature");
+  _h_ref = getParam<Real>("reference_enthalpy");
 }
 
 Real
@@ -80,18 +80,6 @@ MoskitoEOS1P_IdealFluid::rho_from_p_T(const Real & pressure, const Real & temper
   rho = this->rho_from_p_T(pressure, temperature);
   drho_dp = rho / _bulk_modulus;
   drho_dT = (-_thermal_expansion_0 - _thermal_expansion_1 * temperature) * rho;
-}
-
-Real
-MoskitoEOS1P_IdealFluid::h_to_T(const Real & pressure, const Real & enthalpy) const
-{
-  return (enthalpy - _h_ref) / _cp + _T_ref;
-}
-
-Real
-MoskitoEOS1P_IdealFluid::T_to_h(const Real & pressure, const Real & temperature) const
-{
-  return cp(pressure, temperature) * (temperature - _T_ref) + _h_ref;
 }
 
 Real

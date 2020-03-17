@@ -22,6 +22,9 @@
   [./eos]
     type = MoskitoEOS1P_IdealFluid
     bulk_modulus = 2e+012
+    reference_temperature = 293.15
+    reference_enthalpy = 0
+    reference_density = 1000
   [../]
   [./viscosity]
     type = MoskitoViscosityConst
@@ -33,14 +36,17 @@
   [./area0]
     type = MoskitoFluidWell1P
     pressure = p
-    enthalpy = h
+    temperature = T
     flowrate = q
     well_direction = x
+    well_type = injection
     eos_uo = eos
     viscosity_uo = viscosity
     well_diameter = 0.152
     roughness_type = smooth
     gravity = '0 -9.8 0'
+    output_properties = 'density'
+    outputs = exodus
   [../]
 []
 
@@ -49,45 +55,45 @@
     type = DirichletBC
     variable = p
     boundary = right
-    value = '2.07e6'
+    value = 2.07e6
   [../]
   [./qbc]
     type = DirichletBC
     variable = q
     boundary = right
-    value = -0.046296296
+    value = 0.046296296
   [../]
 []
 
 [Variables]
-  [./h]
-    initial_condition = 0
+  [./T]
+    initial_condition = 293.15
   [../]
   [./p]
     initial_condition = 2.07e6
   [../]
   [./q]
     scaling = 1e-2
-    initial_condition = -0.046296296
+    initial_condition = 0.046296296
   [../]
 []
 
 [Kernels]
-  [./hkernel]
+  [./Tkernel]
     type = NullKernel
-    variable = h
+    variable = T
   [../]
   [./pkernel]
-    type = MoskitoMass
+    type = MoskitoMass_1p1c
     variable = p
     flowrate = q
-    enthalpy = h
+    temperature = T
   [../]
   [./qkernel]
-    type = MoskitoMomentum
+    type = MoskitoMomentum_1p1c
     variable = q
     pressure = p
-    enthalpy = h
+    temperature = T
   [../]
 []
 

@@ -56,7 +56,7 @@ MoskitoMomentum::MoskitoMomentum(const InputParameters & parameters)
     _gravity(getMaterialProperty<RealVectorValue>("gravity")),
     _area(getMaterialProperty<Real>("well_area")),
     _well_dir(getMaterialProperty<RealVectorValue>("well_direction_vector")),
-    _flow_dir(getMaterialProperty<Real>("flow_direction"))
+    _flow_dir(getMaterialProperty<Real>("flow_direction_sign"))
 {
   if (hasMaterialProperty<Real>("dgamma_dz"))
   {
