@@ -1,3 +1,4 @@
+
 /**************************************************************************/
 /*  MOSKITO - Multiphysics cOupled Simulator toolKIT for wellbOres        */
 /*                                                                        */
@@ -21,20 +22,19 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOMOMENTUM_H
-#define MOSKITOMOMENTUM_H
+#pragma once
 
 #include "Kernel.h"
 
-class MoskitoMomentum;
+class MoskitoMomentum_2p;
 
 template <>
-InputParameters validParams<MoskitoMomentum>();
+InputParameters validParams<MoskitoMomentum_2p>();
 
-class MoskitoMomentum : public Kernel
+class MoskitoMomentum_2p : public Kernel
 {
 public:
-  MoskitoMomentum(const InputParameters & parameters);
+  MoskitoMomentum_2p(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -88,5 +88,3 @@ private:
   // an indicator for 2 phase flow model
   bool _2p_ind = false;
 };
-
-#endif // MOSKITOMOMENTUM_H
