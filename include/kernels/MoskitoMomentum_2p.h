@@ -54,37 +54,18 @@ protected:
   const MaterialProperty<Real> & _rho;
   // The first derivative of mixture density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
-  // The second derivative of mixture density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
   // The first derivative of mixture density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of mixture density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The pipe diameter
-  const MaterialProperty<Real> & _d;
   // The pipe Moody friction factor
   const MaterialProperty<Real> & _f;
   // The gravity acceleration as a vector
   const MaterialProperty<RealVectorValue> & _gravity;
   // The area of pipe
   const MaterialProperty<Real> & _area;
+  // The wetted perimeter of pipe
+  const MaterialProperty<Real> & _perimeter;
   // The unit vector of well direction
   const MaterialProperty<RealVectorValue> & _well_dir;
   // The flow direction
-  const MaterialProperty<Real> & _flow_dir;
-
-  // residual for dgamma_dz in the momentum conservation
-  const MaterialProperty<Real> * _dgamma_dz = NULL;
-  // diagonal jacobian of the residual wrt uj for dgamma_dz in the momentum conservation
-  const MaterialProperty<Real> * _dgamma_dz_uj_gphi = NULL;
-  const MaterialProperty<Real> * _dgamma_dz_uj_phi = NULL;
-  // diagonal jacobian of the residual wrt pj for dgamma_dz in the momentum conservation
-  const MaterialProperty<Real> * _dgamma_dz_pj_gphi = NULL;
-  const MaterialProperty<Real> * _dgamma_dz_pj_phi = NULL;
-  // diagonal jacobian of the residual wrt hj for dgamma_dz in the momentum conservation
-  const MaterialProperty<Real> * _dgamma_dz_hj_gphi = NULL;
-  const MaterialProperty<Real> * _dgamma_dz_hj_phi = NULL;
-private:
-  // an indicator for 2 phase flow model
-  bool _2p_ind = false;
+  const MaterialProperty<Real> & _well_sign;
 };
