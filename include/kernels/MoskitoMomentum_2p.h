@@ -68,4 +68,16 @@ protected:
   const MaterialProperty<RealVectorValue> & _well_dir;
   // The flow direction
   const MaterialProperty<Real> & _well_sign;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dh;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dp;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dhq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dpq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dq2;
 };
