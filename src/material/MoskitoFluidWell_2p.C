@@ -66,13 +66,12 @@ MoskitoFluidWell_2p::MoskitoFluidWell_2p(const InputParameters & parameters)
     _flow_pat(declareProperty<Real>("flow_pattern")),
     _v_sg(declareProperty<Real>("superficial_gas_velocity")),
     _v_sl(declareProperty<Real>("superficial_liquid_velocity")),
-    _dgamma_dz(declareProperty<Real>("dgamma_dz")),
-    _dgamma_dz_uj_gphi(declareProperty<Real>("dgamma_dz_uj_gphi")),
-    _dgamma_dz_uj_phi(declareProperty<Real>("dgamma_dz_uj_phi")),
-    _dgamma_dz_pj_gphi(declareProperty<Real>("dgamma_dz_pj_gphi")),
-    _dgamma_dz_pj_phi(declareProperty<Real>("dgamma_dz_pj_phi")),
-    _dgamma_dz_hj_gphi(declareProperty<Real>("dgamma_dz_hj_gphi")),
-    _dgamma_dz_hj_phi(declareProperty<Real>("dgamma_dz_hj_phi")),
+    _dgamma_dh(declareProperty<Real>("dgamma_dh")),
+    _dgamma_dp(declareProperty<Real>("dgamma_dp")),
+    _dgamma_dq(declareProperty<Real>("dgamma_dq")),
+    _dgamma2_dhq(declareProperty<Real>("dgamma2_dhq")),
+    _dgamma2_dpq(declareProperty<Real>("dgamma2_dpq")),
+    _dgamma2_dq2(declareProperty<Real>("dgamma2_dq2")),
     _h(coupledValue("enthalpy")),
     _grad_flow(coupledGradient("flowrate")),
     _grad_h(coupledGradient("enthalpy")),
@@ -152,17 +151,22 @@ MoskitoFluidWell_2p::computeQpProperties()
     DriftFluxMomentumEq();
   else
   {
-    _dgamma_dz[_qp]         = 0.0;
-    _dgamma_dz_uj_gphi[_qp] = 0.0;
-    _dgamma_dz_uj_phi[_qp]  = 0.0;
-    _dgamma_dz_pj_gphi[_qp] = 0.0;
-    _dgamma_dz_pj_phi[_qp]  = 0.0;
-    _dgamma_dz_hj_gphi[_qp] = 0.0;
-    _dgamma_dz_hj_phi[_qp]  = 0.0;
+    _dgamma_dh[_qp] = 0.0;
+    _dgamma_dp[_qp] = 0.0;
+    _dgamma_dq[_qp] = 0.0;
+    _dgamma2_dhq[_qp] = 0.0;
+    _dgamma2_dpq[_qp] = 0.0;
+    _dgamma2_dq2[_qp] = 0.0;
   }
 
   // _lambda[_qp]  = (1.0 - (_d * _d) / std::pow(_d + _thickness , 2.0)) * _lambda0;
   // _lambda[_qp] += (_d * _d) / std::pow(_d + _thickness , 2.0) * eos_uo._lambda;
+}
+
+Real
+MoskitoFluidWell_2p::gamma(const Real & h, const Real & p, const Real & q)
+{
+  return 0.0;
 }
 
 void
@@ -192,73 +196,73 @@ MoskitoFluidWell_2p::DriftFluxMomentumEq()
   c = _rho_g[_qp] * _rho_l[_qp] * _rho_m[_qp] / (_rho_pam[_qp] * _rho_pam[_qp]);
   d = b * _u[_qp] + _u_d[_qp];
 
-  // parameterizing dgamma_dz equation for simpilification
-  _drho_g_dz  = (_drho_g_dp * _grad_p[_qp] + _drho_g_dT * _grad_h[_qp] / _cp_m[_qp]) * _well_dir[_qp];
-  _drho_l_dz  = (_drho_l_dp * _grad_p[_qp] + _drho_l_dT * _grad_h[_qp] / _cp_m[_qp]) * _well_dir[_qp];
-  _drho_m_dz  =  _vfrac[_qp] * _drho_g_dz + (1.0 - _vfrac[_qp]) * _drho_l_dz;
-  _drho_pam_dz = _c0[_qp] * _vfrac[_qp] * _drho_g_dz + (1.0 - _vfrac[_qp] * _c0[_qp]) * _drho_l_dz;
-  part1  = _drho_g_dz  * _rho_l[_qp]     * _rho_m[_qp];
-  part1 += _rho_g[_qp] * _drho_l_dz      * _rho_m[_qp];
-  part1 += _rho_g[_qp] * _rho_l[_qp]     * _drho_m_dz;
-  part2  = -2.0 * _drho_pam_dz * _rho_g[_qp] * _rho_l[_qp] * _rho_m[_qp];
-  _dc_dz = (part1 * _rho_pam[_qp] + part2) / std::pow(_rho_pam[_qp] , 3.0);
-
-  // residual for dgamma_dz in the momentum conservation
-  _dgamma_dz[_qp]  = a * _dc_dz * std::pow(d, 2.0);
-  _dgamma_dz[_qp] += 2.0 * a * b * c * d * _grad_flow[_qp] / _area[_qp] * _well_dir[_qp];
-
-  // diagonal jacobian of the residual wrt uj for dgamma_dz in the momentum conservation
-  _dgamma_dz_uj_gphi[_qp]  = 2.0 * a * b * c * d / _area[_qp];
-  _dgamma_dz_uj_phi[_qp]  = _dc_dz * d + c * b * _grad_flow[_qp] / _area[_qp] * _well_dir[_qp];
-  _dgamma_dz_uj_phi[_qp] *= 2.0 * a * b;
-
-  _drho_pam_dp = _c0[_qp] * _drho_g_dp * _vfrac[_qp] + (1.0 - _vfrac[_qp] * _c0[_qp]) * _drho_l_dp;
-  temp1  = _drho_g_dp  * _rho_l[_qp]     * _rho_m[_qp];
-  temp1 += _rho_g[_qp] * _drho_l_dp      * _rho_m[_qp];
-  temp1 += _rho_g[_qp] * _rho_l[_qp]     * _drho_m_dp[_qp];
-  temp2  = -2.0 * _drho_pam_dp * _rho_g[_qp] * _rho_l[_qp] * _rho_m[_qp];
-  _dc_dp  = (temp1 * _rho_pam[_qp] + temp2) / std::pow(_rho_pam[_qp] , 3.0);
-
-  // off diagonal jacobian of the residual wrt pj for dgamma_dz in the momentum conservation
-  _dgamma_dz_pj_gphi[_qp] = a * d * d * _dc_dp;
-  _dgamma_dz_pj_phi[_qp]  = _drho_g_dz  * _drho_l_dp  * _rho_m[_qp];
-  _dgamma_dz_pj_phi[_qp] += _drho_g_dz  * _rho_l[_qp] * _drho_m_dp[_qp];
-  _dgamma_dz_pj_phi[_qp] += _drho_g_dp  * _drho_l_dz  * _rho_m[_qp];
-  _dgamma_dz_pj_phi[_qp] += _rho_g[_qp] * _drho_l_dz  * _drho_m_dp[_qp];
-  _dgamma_dz_pj_phi[_qp] += _drho_g_dp  * _rho_l[_qp] * _drho_m_dz;
-  _dgamma_dz_pj_phi[_qp] += _rho_g[_qp] * _drho_l_dp  * _drho_m_dz;
-  _dgamma_dz_pj_phi[_qp] *= _rho_pam[_qp];
-  _dgamma_dz_pj_phi[_qp] += _drho_pam_dp * part1;
-  _dgamma_dz_pj_phi[_qp] -= 2.0 * _drho_m_dz * temp1;
-  _dgamma_dz_pj_phi[_qp] *= _rho_pam[_qp];
-  _dgamma_dz_pj_phi[_qp] -= 3.0 * _drho_pam_dp * (part1 * _rho_pam[_qp] + part2);
-  _dgamma_dz_pj_phi[_qp] /= std::pow(_rho_pam[_qp] , 4.0);
-  _dgamma_dz_pj_phi[_qp] *= a * d * d;
-  _dgamma_dz_pj_phi[_qp] += 2.0 * a * b * _dc_dp * d * _grad_flow[_qp] / _area[_qp] * _well_dir[_qp];
-
-  _drho_pam_dh  = _c0[_qp] * _drho_g_dT * _vfrac[_qp] + (1.0 - _vfrac[_qp] * _c0[_qp]) * _drho_l_dT;
-  _drho_pam_dh /= _cp_m[_qp];
-  temp1  = _drho_g_dT  * _rho_l[_qp]     * _rho_m[_qp];
-  temp1 += _rho_g[_qp] * _drho_l_dT      * _rho_m[_qp];
-  temp1 += _rho_g[_qp] * _rho_l[_qp]     * _drho_m_dT[_qp];
-  temp1 /= _cp_m[_qp];
-  temp2  = -2.0 * _drho_pam_dh * _rho_g[_qp] * _rho_l[_qp] * _rho_m[_qp];
-  _dc_dh  = (temp1 * _rho_pam[_qp] + temp2) / std::pow(_rho_pam[_qp] , 3.0);
-
-  // off diagonal jacobian of the residual wrt hj for dgamma_dz in the momentum conservation
-  _dgamma_dz_hj_gphi[_qp] = a * d * d * _dc_dh;
-  _dgamma_dz_hj_phi[_qp]  = _drho_g_dz  * _drho_l_dT  * _rho_m[_qp];
-  _dgamma_dz_hj_phi[_qp] += _drho_g_dz  * _rho_l[_qp] * _drho_m_dT[_qp];
-  _dgamma_dz_hj_phi[_qp] += _drho_g_dT  * _drho_l_dz  * _rho_m[_qp];
-  _dgamma_dz_hj_phi[_qp] += _rho_g[_qp] * _drho_l_dz  * _drho_m_dT[_qp];
-  _dgamma_dz_hj_phi[_qp] += _drho_g_dT  * _rho_l[_qp] * _drho_m_dz;
-  _dgamma_dz_hj_phi[_qp] += _rho_g[_qp] * _drho_l_dT  * _drho_m_dz;
-  _dgamma_dz_hj_phi[_qp] *= _rho_pam[_qp] / _cp_m[_qp];
-  _dgamma_dz_hj_phi[_qp] += _drho_pam_dh * part1;
-  _dgamma_dz_hj_phi[_qp] -= 2.0 * _drho_m_dz * temp1;
-  _dgamma_dz_hj_phi[_qp] *= _rho_pam[_qp];
-  _dgamma_dz_hj_phi[_qp] -= 3.0 * _drho_pam_dh * (part1 * _rho_pam[_qp] + part2);
-  _dgamma_dz_hj_phi[_qp] /= std::pow(_rho_pam[_qp] , 4.0);
-  _dgamma_dz_hj_phi[_qp] *= a * d * d;
-  _dgamma_dz_hj_phi[_qp] += 2.0 * a * b * _dc_dh * d * _grad_flow[_qp] / _area[_qp] * _well_dir[_qp];
+  // // parameterizing dgamma_dz equation for simpilification
+  // _drho_g_dz  = (_drho_g_dp * _grad_p[_qp] + _drho_g_dT * _grad_h[_qp] / _cp_m[_qp]) * _well_dir[_qp];
+  // _drho_l_dz  = (_drho_l_dp * _grad_p[_qp] + _drho_l_dT * _grad_h[_qp] / _cp_m[_qp]) * _well_dir[_qp];
+  // _drho_m_dz  =  _vfrac[_qp] * _drho_g_dz + (1.0 - _vfrac[_qp]) * _drho_l_dz;
+  // _drho_pam_dz = _c0[_qp] * _vfrac[_qp] * _drho_g_dz + (1.0 - _vfrac[_qp] * _c0[_qp]) * _drho_l_dz;
+  // part1  = _drho_g_dz  * _rho_l[_qp]     * _rho_m[_qp];
+  // part1 += _rho_g[_qp] * _drho_l_dz      * _rho_m[_qp];
+  // part1 += _rho_g[_qp] * _rho_l[_qp]     * _drho_m_dz;
+  // part2  = -2.0 * _drho_pam_dz * _rho_g[_qp] * _rho_l[_qp] * _rho_m[_qp];
+  // _dc_dz = (part1 * _rho_pam[_qp] + part2) / std::pow(_rho_pam[_qp] , 3.0);
+  //
+  // // residual for dgamma_dz in the momentum conservation
+  // _dgamma_dz[_qp]  = a * _dc_dz * std::pow(d, 2.0);
+  // _dgamma_dz[_qp] += 2.0 * a * b * c * d * _grad_flow[_qp] / _area[_qp] * _well_dir[_qp];
+  //
+  // // diagonal jacobian of the residual wrt uj for dgamma_dz in the momentum conservation
+  // _dgamma_dz_uj_gphi[_qp]  = 2.0 * a * b * c * d / _area[_qp];
+  // _dgamma_dz_uj_phi[_qp]  = _dc_dz * d + c * b * _grad_flow[_qp] / _area[_qp] * _well_dir[_qp];
+  // _dgamma_dz_uj_phi[_qp] *= 2.0 * a * b;
+  //
+  // _drho_pam_dp = _c0[_qp] * _drho_g_dp * _vfrac[_qp] + (1.0 - _vfrac[_qp] * _c0[_qp]) * _drho_l_dp;
+  // temp1  = _drho_g_dp  * _rho_l[_qp]     * _rho_m[_qp];
+  // temp1 += _rho_g[_qp] * _drho_l_dp      * _rho_m[_qp];
+  // temp1 += _rho_g[_qp] * _rho_l[_qp]     * _drho_m_dp[_qp];
+  // temp2  = -2.0 * _drho_pam_dp * _rho_g[_qp] * _rho_l[_qp] * _rho_m[_qp];
+  // _dc_dp  = (temp1 * _rho_pam[_qp] + temp2) / std::pow(_rho_pam[_qp] , 3.0);
+  //
+  // // off diagonal jacobian of the residual wrt pj for dgamma_dz in the momentum conservation
+  // _dgamma_dz_pj_gphi[_qp] = a * d * d * _dc_dp;
+  // _dgamma_dz_pj_phi[_qp]  = _drho_g_dz  * _drho_l_dp  * _rho_m[_qp];
+  // _dgamma_dz_pj_phi[_qp] += _drho_g_dz  * _rho_l[_qp] * _drho_m_dp[_qp];
+  // _dgamma_dz_pj_phi[_qp] += _drho_g_dp  * _drho_l_dz  * _rho_m[_qp];
+  // _dgamma_dz_pj_phi[_qp] += _rho_g[_qp] * _drho_l_dz  * _drho_m_dp[_qp];
+  // _dgamma_dz_pj_phi[_qp] += _drho_g_dp  * _rho_l[_qp] * _drho_m_dz;
+  // _dgamma_dz_pj_phi[_qp] += _rho_g[_qp] * _drho_l_dp  * _drho_m_dz;
+  // _dgamma_dz_pj_phi[_qp] *= _rho_pam[_qp];
+  // _dgamma_dz_pj_phi[_qp] += _drho_pam_dp * part1;
+  // _dgamma_dz_pj_phi[_qp] -= 2.0 * _drho_m_dz * temp1;
+  // _dgamma_dz_pj_phi[_qp] *= _rho_pam[_qp];
+  // _dgamma_dz_pj_phi[_qp] -= 3.0 * _drho_pam_dp * (part1 * _rho_pam[_qp] + part2);
+  // _dgamma_dz_pj_phi[_qp] /= std::pow(_rho_pam[_qp] , 4.0);
+  // _dgamma_dz_pj_phi[_qp] *= a * d * d;
+  // _dgamma_dz_pj_phi[_qp] += 2.0 * a * b * _dc_dp * d * _grad_flow[_qp] / _area[_qp] * _well_dir[_qp];
+  //
+  // _drho_pam_dh  = _c0[_qp] * _drho_g_dT * _vfrac[_qp] + (1.0 - _vfrac[_qp] * _c0[_qp]) * _drho_l_dT;
+  // _drho_pam_dh /= _cp_m[_qp];
+  // temp1  = _drho_g_dT  * _rho_l[_qp]     * _rho_m[_qp];
+  // temp1 += _rho_g[_qp] * _drho_l_dT      * _rho_m[_qp];
+  // temp1 += _rho_g[_qp] * _rho_l[_qp]     * _drho_m_dT[_qp];
+  // temp1 /= _cp_m[_qp];
+  // temp2  = -2.0 * _drho_pam_dh * _rho_g[_qp] * _rho_l[_qp] * _rho_m[_qp];
+  // _dc_dh  = (temp1 * _rho_pam[_qp] + temp2) / std::pow(_rho_pam[_qp] , 3.0);
+  //
+  // // off diagonal jacobian of the residual wrt hj for dgamma_dz in the momentum conservation
+  // _dgamma_dz_hj_gphi[_qp] = a * d * d * _dc_dh;
+  // _dgamma_dz_hj_phi[_qp]  = _drho_g_dz  * _drho_l_dT  * _rho_m[_qp];
+  // _dgamma_dz_hj_phi[_qp] += _drho_g_dz  * _rho_l[_qp] * _drho_m_dT[_qp];
+  // _dgamma_dz_hj_phi[_qp] += _drho_g_dT  * _drho_l_dz  * _rho_m[_qp];
+  // _dgamma_dz_hj_phi[_qp] += _rho_g[_qp] * _drho_l_dz  * _drho_m_dT[_qp];
+  // _dgamma_dz_hj_phi[_qp] += _drho_g_dT  * _rho_l[_qp] * _drho_m_dz;
+  // _dgamma_dz_hj_phi[_qp] += _rho_g[_qp] * _drho_l_dT  * _drho_m_dz;
+  // _dgamma_dz_hj_phi[_qp] *= _rho_pam[_qp] / _cp_m[_qp];
+  // _dgamma_dz_hj_phi[_qp] += _drho_pam_dh * part1;
+  // _dgamma_dz_hj_phi[_qp] -= 2.0 * _drho_m_dz * temp1;
+  // _dgamma_dz_hj_phi[_qp] *= _rho_pam[_qp];
+  // _dgamma_dz_hj_phi[_qp] -= 3.0 * _drho_pam_dh * (part1 * _rho_pam[_qp] + part2);
+  // _dgamma_dz_hj_phi[_qp] /= std::pow(_rho_pam[_qp] , 4.0);
+  // _dgamma_dz_hj_phi[_qp] *= a * d * d;
+  // _dgamma_dz_hj_phi[_qp] += 2.0 * a * b * _dc_dh * d * _grad_flow[_qp] / _area[_qp] * _well_dir[_qp];
 }
