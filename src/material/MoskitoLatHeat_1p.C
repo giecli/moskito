@@ -34,6 +34,7 @@ validParams<MoskitoLatHeat_1p>()
     params += validParams<NewtonIteration>();
     params.addClassDescription("Materials for the Lateral heat transfer between "
           "wellbore and formation");
+    params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable (K)");
     params.addParam<Real>("emissivity_annulus_outer", 0.9,
           "Emissivity of inside casing surface ()");
     params.addParam<Real>("emissivity_annulus_inner", 0.9,
