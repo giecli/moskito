@@ -38,7 +38,7 @@ class MoskitoFluidWell_2p : public MoskitoFluidWellGeneral
 public:
   MoskitoFluidWell_2p(const InputParameters & parameters);
   virtual void computeQpProperties() override;
-  void DriftFluxMomentumEq();
+  void GammaDerivatives();
   Real gamma(const Real & h, const Real & p, const Real & q);
 
 protected:
