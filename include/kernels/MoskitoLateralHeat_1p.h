@@ -21,39 +21,35 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoLateralHeat.h"
+#pragma once
 
-registerMooseObject("MoskitoApp", MoskitoLateralHeat);
+#include "Kernel.h"
+
+class MoskitoLateralHeat_1p;
 
 template <>
-InputParameters
-validParams<MoskitoLateralHeat>()
+InputParameters validParams<MoskitoLateralHeat_1p>();
+
+class MoskitoLateralHeat_1p : public Kernel
 {
-  InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Lateral heat exchange between wellbore "
-        "and formation including tubing (mandatory), insulation, liquid filled "
-        "annulus and cementation");
-  return params;
-}
+public:
+  MoskitoLateralHeat_1p(const InputParameters & parameters);
 
-MoskitoLateralHeat::MoskitoLateralHeat(const InputParameters & parameters)
-  : Kernel(parameters),
-  _T(getMaterialProperty<Real>("temperature")),
-  _rto(getMaterialProperty<Real>("radius_tubbing_outer")),
-  _Uto(getMaterialProperty<Real>("thermal_resistivity_well")),
-  _Twb(getMaterialProperty<Real>("temperature_well_formation_interface")),
-  _diameter_liquid(getMaterialProperty<Real>("well_diameter"))
-  {
-  }
-
-Real
-MoskitoLateralHeat::computeQpResidual()
-{
-  Real r = 0.0;
-  r =  2.0 * PI * _rto[_qp] * _Uto[_qp];
-  r *= ((_T[_qp]) - _Twb[_qp]);
-  r /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
-  r *= _test[_i][_qp];
-
-  return  r;
-}
+protected:
+  virtual Real computeQpResidual() override;
+  // The coupled temperature
+  const VariableValue & _T;
+  // Radius tubing outer
+  const MaterialProperty<Real> & _rto;
+  // Thermal wellbore resistivity
+  const MaterialProperty<Real> & _Uto;
+  // Temperature at formation - cement boundary
+  const MaterialProperty<Real> & _Twb;
+  // Diameter filled with liquid = _rti
+  const MaterialProperty<Real> & _diameter_liquid;
+  const Real gradC_to_gradR = 1.8;
+  const Real Watt_to_Btu_per_h = 3.412141633;
+  const Real m_to_ft    = 3.280839895;
+  const Real Rankine_absol = 491.67;
+  const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
+};
