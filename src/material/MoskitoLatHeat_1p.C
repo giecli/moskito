@@ -84,7 +84,7 @@ validParams<MoskitoLatHeat_1p>()
 MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
   : Material(parameters),
     NewtonIteration(parameters),
-    _T(getMaterialProperty<Real>("temperature")),
+    _T(coupledValue("temperature")),
     _RadTubout(declareProperty<Real>("radius_tubbing_outer")),
     _TRock(declareProperty<Real>("formation_temperature")),
     _Annulus_eao(getParam<Real>("emissivity_annulus_outer")),
