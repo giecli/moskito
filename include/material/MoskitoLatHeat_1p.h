@@ -23,21 +23,20 @@
 
 #pragma once
 
-#pragma once
 
 #include "Material.h"
 #include "Function.h"
 #include "NewtonIteration.h"
 
-class MoskitoLatHeatIterationXiong;
+class MoskitoLatHeat_1p;
 
 template <>
-InputParameters validParams<MoskitoLatHeatIterationXiong>();
+InputParameters validParams<MoskitoLatHeat_1p>();
 
-class MoskitoLatHeatIterationXiong : public Material, public NewtonIteration
+class MoskitoLatHeat_1p : public Material, public NewtonIteration
 {
 public:
-  MoskitoLatHeatIterationXiong(const InputParameters & parameters);
+  MoskitoLatHeat_1p(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
   virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;
