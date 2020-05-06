@@ -37,8 +37,6 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
-  // The coupled temperature
-  const VariableValue & _T;
   // Radius tubing outer
   const MaterialProperty<Real> & _rto;
   // Thermal wellbore resistivity
