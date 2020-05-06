@@ -41,7 +41,7 @@ public:
 
   virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;
   virtual Real computeResidual(const Real trail_value, const Real scalar) override;
-  virtual Real computeDerivative(const Real trailn_value, const Real scalar) override;
+  virtual Real computeDerivative(const Real trail_value, const Real scalar) override;
   virtual Real initialGuess(const Real trail_value) override;
   virtual Real minimumPermissibleValue(const Real trail_value) const override
   {
