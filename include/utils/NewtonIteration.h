@@ -150,10 +150,10 @@ private:
   const bool _internal_solve_full_iteration_history;
 
   /// Relative convergence tolerance
-  Real _relative_tolerance;
+  Real _internal_iteration_rel_tol;
 
   /// Absolute convergence tolerance
-  Real _absolute_tolerance;
+  Real _internal_iteration_abs_tol;
 
   /// Multiplier applied to relative and absolute tolerances for acceptable convergence
   Real _acceptable_multiplier;

@@ -27,7 +27,8 @@ MoskitoDFGVar::MoskitoDFGVar(Real v_m, Real rho_g, Real rho_l, const Real & mfra
   Real dia, const Real & dir, const Real & friction, const RealVectorValue & gravity,
   const RealVectorValue & well_dir)
   : _FlowPat(0),
-    _vfrac(0.0),
+    _v_sg(0.0),
+    _v_sl(0.0),
     _C0(0.0),
     _vd(0.0),
     _v_m(fabs(v_m)),
@@ -45,10 +46,9 @@ MoskitoDFGVar::MoskitoDFGVar(Real v_m, Real rho_g, Real rho_l, const Real & mfra
 }
 
 void
-MoskitoDFGVar::DFMOutput(Real & FlowPat, Real & vfrac, Real & C0, Real & vd)
+MoskitoDFGVar::DFMOutput(Real & FlowPat, Real & C0, Real & vd)
 {
   FlowPat = _FlowPat;
-  vfrac = _vfrac;
   C0 = _C0;
   vd = _vd;
 }

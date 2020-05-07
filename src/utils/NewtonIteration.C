@@ -62,8 +62,8 @@ NewtonIteration::NewtonIteration(
     _max_its(1000), // Far larger than ever expected to be needed
     _internal_solve_full_iteration_history(
         parameters.get<bool>("internal_solve_full_iteration_history")),
-    _relative_tolerance(parameters.get<Real>("relative_tolerance")),
-    _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
+    _internal_iteration_rel_tol(parameters.get<Real>("relative_tolerance")),
+    _internal_iteration_abs_tol(parameters.get<Real>("absolute_tolerance")),
     _acceptable_multiplier(parameters.get<Real>("acceptable_multiplier")),
     _num_resids(30),
     _residual_history(_num_resids, std::numeric_limits<Real>::max()),
@@ -290,8 +290,8 @@ NewtonIteration::internalSolve(const Real trial_value,
 bool
 NewtonIteration::converged(const Real residual, const Real reference)
 {
-  return (std::abs(residual) <= _absolute_tolerance ||
-          std::abs(residual / reference) <= _relative_tolerance);
+  return (std::abs(residual) <= _internal_iteration_abs_tol ||
+          std::abs(residual / reference) <= _internal_iteration_rel_tol);
 }
 
 bool
@@ -331,8 +331,8 @@ NewtonIteration::outputIterationStep(std::stringstream * iter_output,
                  << " scalar=" << scalar << " residual=" << residual
                  << " ref_res=" << reference_residual
                  << " rel_res=" << std::abs(residual) / reference_residual
-                 << " rel_tol=" << _relative_tolerance << " abs_res=" << std::abs(residual)
-                 << " abs_tol=" << _absolute_tolerance << '\n';
+                 << " rel_tol=" << _internal_iteration_rel_tol << " abs_res=" << std::abs(residual)
+                 << " abs_tol=" << _internal_iteration_abs_tol << '\n';
   }
 }
 

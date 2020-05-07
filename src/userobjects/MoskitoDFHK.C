@@ -31,7 +31,7 @@ validParams<MoskitoDFHK>()
 {
   InputParameters params = validParams<MoskitoDriftFlux>();
   params.addRequiredParam<Real>("surface_tension",
-        "Surface tension of the liquid phase (kg/s)");
+        "Surface tension of the liquid phase (kg/s²)");
   return params;
 }
 
@@ -52,56 +52,44 @@ MoskitoDFHK::DFMCalculator(MoskitoDFGVar & input) const
   input._dia *= m_to_ft;
   input._v_m *= m_to_ft;
 
-  input._angle = 0.5 * PI - input._angle;
+  // Added by Maziar
+  // To match new sign for flow direction
+  input._dir *= -1.0;
 
   MoskitoHKLVar tmp;
 
-  if (input._mfrac == 0.0)
-  {
-    input._FlowPat = 0;
-    input._C0 = 1.0;
-    input._vd  = 0.0;
-    input._vfrac = 0.0;
-  }
-  else if (input._mfrac == 1.0)
-  {
-    input._FlowPat = 0;
-    input._C0 = 1.0;
-    input._vd  = 0.0;
-    input._vfrac = 1.0;
-  }
+  //check constraints of Hasan Kabir approach
+  if (input._angle > 0.25 * PI)
+    mooseError(name(), ": Angle > 45°, violating Hasan & Kabir limitations");
 
-  else
-  {
-    //check constraints of Hasan Kabir approach
-    if (input._angle < 0.25 * PI)
-      mooseError(name(), ": Angle > 45°, violating Hasan & Kabir limitations");
-
-    HKinitialisation(input, tmp);
-    HKcalculator(input, tmp);
-    HKvfrac(input, tmp);
-  }
+  HKinitialisation(input, tmp);
+  HKcalculator(input, tmp);
+  // HKvfrac(input, tmp);
 
   // conversion back to SI
   input._vd /= m_to_ft;
+
+  // Added by Maziar
+  // Normalised c0 by max c0 in HK model to match Shi
+  input._C0 /= 1.2;
+  // correction for ud sign for injection and production
+  if (input._dir == -1.0)
+    input._vd *= -1.0;
 }
 
 void
 MoskitoDFHK::HKinitialisation(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
 {
   cal_v_s(input, LVar);
-
-  cal_vd_tb(input, LVar);
   cal_vd_b(input, LVar);
+  cal_vd_tb(input, LVar);
+  cal_vd_mix(input, LVar);
+  cal_v_gb(input, LVar);
   cal_v_ms(input, LVar);
   cal_v_gc(input, LVar);
-  cal_v_gb(input, LVar);
-  cal_vd_mix(input, LVar);
 
   input._vd = LVar.vd_b;
   input._C0 = _C0b;
-
-  HKvfrac(input, LVar);
 }
 
 void
@@ -110,10 +98,10 @@ MoskitoDFHK::HKcalculator(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
   input._FlowPat = 0;
 
   // Check transition between slug and bubbly flow
-  if (input._vfrac <= 0.25 && LVar.vd_tb > input._vd)
+  if (LVar.v_sg <= LVar.v_gb && LVar.vd_tb > LVar.vd_b)
   {
       // Check transition between dispersed bubbly and bubbly flow
-      if (LVar.v_ms < input._v_m ) //TODO - Check
+      if (LVar.v_ms < input._v_m )
         Det_db_flow(input, LVar);
       else
         Det_bubbly_flow(input, LVar);
@@ -141,24 +129,17 @@ MoskitoDFHK::HKcalculator(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
 }
 
 void
-MoskitoDFHK::HKvfrac(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
-{
-  input._vfrac = LVar.v_sg / (input._C0 * fabs(input._v_m) + input._vd * input._dir);
-
-  if (input._vfrac < 0.0 || isnan(input._vfrac))
-    input._vfrac = 0.0;
-}
-
-void
 MoskitoDFHK::cal_v_s(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
 {
   if (input._dir == 1.0 || input._dir == -1.0) // cocurrent flow
     LVar.v_sg =  input._v_m * input._rho_l * input._mfrac  / ( - input._mfrac * input._rho_g + input._rho_l * input._mfrac + input._rho_g);
+    input._v_sg = LVar.v_sg/m_to_ft;
   // else                 // countercurrent
   //   LVar.v_sg =  - input._v_m * input._rho_l * input._mfrac / ( - input._mfrac * input._rho_g  - input._rho_l * input._mfrac + input._rho_g);
 
   if (input._dir == 1.0 || input._dir == -1.0) // cocurrent flow
     LVar.v_sl = input._v_m - LVar.v_sg;
+    input._v_sl = LVar.v_sl/m_to_ft;
   // else          // countercurrent
   //   LVar.v_sl = LVar.v_sg - input._v_m;
 }
@@ -205,14 +186,6 @@ MoskitoDFHK::cal_v_ms(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
 }
 
 void
-MoskitoDFHK::Det_db_flow(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
-{
-  input._FlowPat = 2;
-  input._C0 = _C0db;
-  input._vd = LVar.vd_b;
-}
-
-void
 MoskitoDFHK::Det_bubbly_flow(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
 {
   input._FlowPat = 1;
@@ -221,13 +194,33 @@ MoskitoDFHK::Det_bubbly_flow(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
 }
 
 void
+MoskitoDFHK::Det_db_flow(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
+{
+  input._FlowPat = 2;
+  input._C0 = _C0db;
+  input._vd = LVar.vd_b;
+}
+
+void
+MoskitoDFHK::Det_slug_flow(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
+{
+  input._FlowPat = 3;
+  if (input._dir == 1)
+    input._C0 = _C0s_u;
+  else
+    input._C0 = interpol(_C0b, _C0s_d, LVar.v_gb, LVar.v_sg);
+
+  input._vd = LVar.vd_mix;
+}
+
+void
 MoskitoDFHK::Det_churn_flow(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
 {
   input._FlowPat = 4;
-  if (input._dir == 1.0)
-    input._C0 = interpol(_C0s_d, _C0c_d, LVar.v_ms, input._v_m);
+  if (input._dir == 1)
+    input._C0 = interpol(_C0s_u, _C0c_u, LVar.v_ms, input._v_m);
   else
-    input._C0 = _C0c_u;
+    input._C0 = _C0c_d;
 
   input._vd = LVar.vd_mix;
 }
@@ -236,24 +229,11 @@ void
 MoskitoDFHK::Det_annular_flow(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
 {
   input._FlowPat = 5;
-  if (input._dir == 1.0)
-    input._C0 = interpol(_C0c_d, _C0a, LVar.v_gc, LVar.v_sg);
-  else
+  if (input._dir == 1)
     input._C0 = interpol(_C0c_u, _C0a, LVar.v_gc, LVar.v_sg);
-
-  input._vd = 0.0;
-}
-
-void
-MoskitoDFHK::Det_slug_flow(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const
-{
-  input._FlowPat = 3;
-  if (input._dir == 1.0)
-    input._C0 = _C0s_d;
   else
-    input._C0 = interpol(_C0b, _C0s_u, LVar.v_gb, LVar.v_sg);
-
-  input._vd = LVar.vd_mix;
+    input._C0 = interpol(_C0c_d, _C0a, LVar.v_gc, LVar.v_sg);
+  input._vd = 0.0;
 }
 
 Real
@@ -261,3 +241,13 @@ MoskitoDFHK::interpol(const Real & C0_1, const Real & C0_2, const Real & v_denom
 {
   return C0_1 * (1 - std::exp(-0.1 * v_denom / (v_num - v_denom))) +  C0_2 * std::exp(-0.1 * v_denom / (v_num - v_denom));
 }
+
+// Internal calculation of vfrac; not used
+// void
+// MoskitoDFHK::HKvfrac(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const // Add for HK_evaluation ???
+// {
+//   input._vfrac = LVar.v_sg / (input._C0 * fabs(input._v_m) + input._vd * input._dir);
+//
+//   if (input._vfrac < 0.0 || isnan(input._vfrac))
+//     input._vfrac = 0.0;
+// }

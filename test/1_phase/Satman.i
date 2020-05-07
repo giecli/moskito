@@ -9,10 +9,10 @@
 
 [UserObjects]
   [./viscosity]
-    type = MoskitoViscositySmith
+    type = MoskitoViscosityWaterSmith
   [../]
   [./eos]
-    type = MoskitoEOSIdealFluid
+    type = MoskitoEOS1P_IdealFluid
     specific_heat = 3160
   [../]
 []
@@ -20,15 +20,19 @@
 [Functions]
   [./grad_func]
     type = ParsedFunction
-    value = '0.09 * x'
+    value = '293.15 + 0.09 * x'
+    # type =  PiecewiseLinear
+    # data_file = Temp.csv
+    # format = columns
+    # axis = x
   [../]
 []
 
 [Materials]
   [./area0]
     type = MoskitoFluidWell1P
+    temperature = T
     pressure = p
-    enthalpy = h
     flowrate = q
     well_direction = x
     well_diameter = 0.3
@@ -36,35 +40,34 @@
     viscosity_uo = viscosity
     roughness_type = smooth
     gravity = '0.0 0 0'
+    well_type = injection
     outputs = exodus
     output_properties = 'temperature density well_velocity specific_heat well_reynolds_no well_moody_friction viscosity diameter'
   [../]
   [./Lateral]
-    type = MoskitoLatHeatIterationXiong
-     radius_wellbore = 0.150000000002
-     radius_tubbing_outer = 0.150000000001
-     conductivity_tubing = 40
+    type = MoskitoLatHeat_1p
+     temperature = T
+     well_diameter_vector = '0.3 0.300000000001 0.300000000002'
+     conductivities_vector = '40.0 0.0'
      # Rock parameters
-     Surface_temperature = 293.15
      thermal_diffusivity_rock = 1.102e-6
      conductivity_rock = 2.92
      # Configuration of material
      geothermal_gradient = grad_func
-     hc_calucation_model = Dropkin_Sommerscales
-     time_model = user_time
-     # user_defined_time = 8640
+     hc_calucation_model =  Raithby_Hollands
+     # user_defined_time = 864000
      user_defined_time = 2592000
-     DimTime_calculation_model = Ramey_1962
+     DimTime_calculation_model = Kutun_2015_eq20
      # internal_solve_full_iteration_history = true
-     output_properties = 'Temperature_Rankine temperature_well_formation_interface heat_loss formation_temperature'
+     output_properties = 'temperature_well_formation_interface formation_temperature'
      outputs = exodus
    [../]
 []
 
 [Variables]
-  [./h]
-    scaling = 1e-6
-    initial_condition = 84010
+  [./T]
+    scaling = 1e-2
+    initial_condition = 293.15
   [../]
   [./p]
     initial_condition = 1.0e5
@@ -81,7 +84,7 @@
     type = DirichletBC
     variable = q
     boundary = right
-    value = -0.020038
+    value = 0.020038
   [../]
   [./pbc]
     type = DirichletBC
@@ -89,38 +92,36 @@
     boundary = left
     value = 1.0e5
   [../]
-  [./hbc]
-    type = MoskitoTemperatureToEnthalpy1P
-    variable = h
-    pressure = p
-    boundary = right
-    temperature = 518.15
-    eos_uo = eos
+  [./Tbc]
+    type = DirichletBC
+    variable = T
+    boundary = left
+    value =  293.15
   [../]
 [../]
 
 [Kernels]
-  [./hkernel]
-    type = MoskitoEnergy
-    variable = h
+  [./Tkernel]
+    type = MoskitoEnergy_1p1c
+    variable = T
     pressure = p
     flowrate = q
   [../]
   [./qkernel1]
-    type = MoskitoMomentum
+    type = MoskitoMomentum_1p1c
     variable = q
     pressure = p
-    enthalpy = h
+    temperature = T
   [../]
   [./pkernel1]
-    type = MoskitoMass
+    type = MoskitoMass_1p1c
     variable = p
-    enthalpy = h
+    temperature = T
     flowrate = q
   [../]
   [./heat]
-    type = MoskitoHeat
-    variable = h
+    type = MoskitoLateralHeat_1p
+    variable = T
   [../]
 []
 
@@ -149,6 +150,13 @@
   [../]
 []
 
+[Postprocessors]
+  [./well]
+    type = NodalL2Norm
+    variable = T
+  [../]
+[]
+
 [Executioner]
   type = Steady
   l_max_its = 50
@@ -162,6 +170,8 @@
 [Outputs]
   exodus = true
   print_linear_residuals = true
+  csv = true
+
   # [./test]
   #   type = VariableResidualNormsDebugOutput
   # [../]

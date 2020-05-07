@@ -28,10 +28,49 @@ InputParameters
 validParams<MoskitoEOS1P>()
 {
   InputParameters params = validParams<GeneralUserObject>();
+
+  // MooseEnum Linearity("yes=1 no=0");
+  // params.addParam<MooseEnum>(
+  //     "cp_linearity", Linearity="yes", "if cp is constant or linear, yes. "
+  //     "Otherwise, no.");
+  // params.addParam<Real>("deltaT", 20.0, "if cp is nonlinear, an approximation "
+  //     "based on , deltaT value, in Celcius is considered for integrations "
+  //     "in the case of the enthalpy and temperature conversions");
+
   return params;
 }
 
 MoskitoEOS1P::MoskitoEOS1P(const InputParameters & parameters)
-  : GeneralUserObject(parameters) {}
+  : GeneralUserObject(parameters)
+  // _cp_linear(getParam<MooseEnum>("cp_linearity")),
+  // _deltaT(getParam<Real>("deltaT"))
+  {}
 
 MoskitoEOS1P::~MoskitoEOS1P() {}
+
+Real
+MoskitoEOS1P::h_from_p_T(const Real & pressure, const Real & temperature) const
+{
+  if (temperature < _T_ref)
+    mooseError(name(), ": Temperature should not be less than the reference temperature");
+
+  Real h = 0.0;
+
+  if (_cp_linear)
+    h += 0.5 * (cp(pressure, temperature) + cp(pressure, _T_ref)) * (temperature - _T_ref);
+  else
+  {
+    Real n = std::ceil((temperature - _T_ref) / _deltaT);
+    Real dT = (temperature - _T_ref) / n;
+
+    for(int i=1;i<n;i++)
+      h += cp(pressure, _T_ref + i * dT);
+
+    h += 0.5 * (cp(pressure, _T_ref) + cp(pressure, temperature));
+    h *= dT;
+  }
+
+  h += _h_ref;
+
+  return h;
+}

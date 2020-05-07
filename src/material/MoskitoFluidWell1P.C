@@ -30,6 +30,7 @@ InputParameters
 validParams<MoskitoFluidWell1P>()
 {
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
+  params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable (K)");
   params.addRequiredParam<UserObjectName>("eos_uo",
         "The name of the userobject for EOS");
   params.addRequiredParam<UserObjectName>("viscosity_uo",
@@ -45,27 +46,31 @@ MoskitoFluidWell1P::MoskitoFluidWell1P(const InputParameters & parameters)
     _cp(declareProperty<Real>("specific_heat")),
     _rho(declareProperty<Real>("density")),
     _drho_dp(declareProperty<Real>("drho_dp")),
-    _drho_dp_2(declareProperty<Real>("drho_dp_2")),
     _drho_dT(declareProperty<Real>("drho_dT")),
-    _drho_dh(declareProperty<Real>("drho_dh")),
-    _drho_dh_2(declareProperty<Real>("drho_dh_2"))
+    _h(declareProperty<Real>("h_from_p_T")),
+    _T(coupledValue("temperature"))
 {
 }
 
 void
 MoskitoFluidWell1P::computeQpProperties()
 {
-  _T[_qp] = eos_uo.h_to_T(_h[_qp], _P[_qp]);
-  _cp[_qp] = eos_uo.cp(_T[_qp], _P[_qp]);
+  _cp[_qp] = eos_uo.cp(_P[_qp], _T[_qp]);
+  _h[_qp] = eos_uo.h_from_p_T(_P[_qp], _T[_qp]);
 
-  eos_uo.rho_from_p_T(_P[_qp], _T[_qp], _h[_qp], _rho[_qp], _drho_dp[_qp], _drho_dT[_qp]);
-  Real RHHo = _rho[_qp];
-  _drho_dh[_qp] = _drho_dT[_qp] / _cp[_qp];
-  _drho_dp_2[_qp] = 0.0;
-  _drho_dh_2[_qp] = 0.0;
+  eos_uo.rho_from_p_T(_P[_qp], _T[_qp], _rho[_qp], _drho_dp[_qp], _drho_dT[_qp]);
 
   _dia[_qp] = _d;
-  _area[_qp] = PI * _d * _d / 4.0;
+  if (!(_area_defined*_perimeter_defined))
+  {
+    _area[_qp] = PI * _dia[_qp] * _dia[_qp] / 4.0;
+    _perimeter[_qp] = PI * _dia[_qp];
+  }
+  else
+  {
+    _area[_qp] = _u_area;
+    _perimeter[_qp] = _u_perimeter;
+  }
 
   _u[_qp] = _flow[_qp] / _area[_qp];
   _Re[_qp] = _rho[_qp] * _dia[_qp] * fabs(_u[_qp]) / viscosity_uo.mu(_P[_qp], _T[_qp]);

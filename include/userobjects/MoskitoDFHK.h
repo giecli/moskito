@@ -46,7 +46,7 @@ public:
   // final calculator
   void HKcalculator(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const;
   // Calculation of Void fraction
-  void HKvfrac(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const;
+  // void HKvfrac(MoskitoDFGVar & input, MoskitoHKLVar & LVar) const;
 
 protected:
   // Main code determination of flow pattern, C0, vd and void fraction
