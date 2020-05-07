@@ -124,6 +124,13 @@ MoskitoFluidWell_2p::computeQpProperties()
     _u_d[_qp] = 0.0;
   }
 
+  // these modifications should be done in HK model not in material
+  // Normalised HK c0 by max c0
+  _c0[_qp] /= 1.2;
+  // correction for ud sign in Basti model
+  if (_well_sign[_qp] == 1.0)
+    _u_d[_qp] *= -1.0;
+
   // based on mass weighted flow rate
   // momentum eq is valid only by mass mixing flow rate
   if (_phase[_qp] == 2.0)
@@ -191,24 +198,54 @@ MoskitoFluidWell_2p::GammaDerivatives()
   dp = tol * _P[_qp];
   dq = tol * _flow[_qp];
 
-  _dgamma_dh[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp]) - gamma(_h[_qp] - dh, _P[_qp], _flow[_qp]);
-  _dgamma_dh[_qp] /= 2.0 * dh;
+  if (dh != 0.0)
+  {
+    _dgamma_dh[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp]) - gamma(_h[_qp] - dh, _P[_qp], _flow[_qp]);
+    _dgamma_dh[_qp] /= 2.0 * dh;
+  }
+  else
+    _dgamma_dh[_qp] = 0.0;
 
+  if (dp != 0.0)
+  {
   _dgamma_dp[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp]) - gamma(_h[_qp], _P[_qp] - dp, _flow[_qp]);
   _dgamma_dp[_qp] /= 2.0 * dp;
+  }
+  else
+    _dgamma_dp[_qp] = 0.0;
 
+  if (dq != 0.0)
+  {
   _dgamma_dq[_qp]  = gamma(_h[_qp], _P[_qp], _flow[_qp] + dq) - gamma(_h[_qp], _P[_qp], _flow[_qp] - dq);
   _dgamma_dq[_qp] /= 2.0 * dq;
+  }
+  else
+    _dgamma_dq[_qp] = 0.0;
 
+  if (dh * dq != 0.0)
+  {
   _dgamma2_dhq[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] - dq);
   _dgamma2_dhq[_qp] -= gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] - dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] + dq);
   _dgamma2_dhq[_qp] /= 4.0 * dh * dq;
+  }
+  else
+    _dgamma2_dhq[_qp] = 0.0;
 
+  if (dp * dq != 0.0)
+  {
   _dgamma2_dpq[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] - dq);
   _dgamma2_dpq[_qp] -= gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] - dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] + dq);
   _dgamma2_dpq[_qp] /= 4.0 * dp * dq;
+  }
+  else
+    _dgamma2_dpq[_qp] = 0.0;
 
+  if (dq != 0.0)
+  {
   _dgamma2_dq2[_qp]  = gamma(_h[_qp], _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp], _flow[_qp] - dq);
   _dgamma2_dq2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _flow[_qp]);
   _dgamma2_dq2[_qp] /=  dq * dq;
+  }
+  else
+    _dgamma2_dq2[_qp] = 0.0;
 }

@@ -36,6 +36,7 @@
     enthalpy = h
     flowrate = q
     well_direction = x
+    well_type = injection
     eos_uo = eos
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
