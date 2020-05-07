@@ -21,26 +21,22 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOLATERALHEAT_H
-#define MOSKITOLATERALHEAT_H
+#pragma once
 
 #include "Kernel.h"
 
-class MoskitoLateralHeat;
+class MoskitoLateralHeat_1p;
 
 template <>
-InputParameters validParams<MoskitoLateralHeat>();
+InputParameters validParams<MoskitoLateralHeat_1p>();
 
-class MoskitoLateralHeat : public Kernel
+class MoskitoLateralHeat_1p : public Kernel
 {
 public:
-  MoskitoLateralHeat(const InputParameters & parameters);
+  MoskitoLateralHeat_1p(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
-
-  // temperature
-  const MaterialProperty<Real> & _T;
   // Radius tubing outer
   const MaterialProperty<Real> & _rto;
   // Thermal wellbore resistivity
@@ -55,5 +51,3 @@ protected:
   const Real Rankine_absol = 491.67;
   const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };
-
-#endif // MOSKITOLATERALHEAT_H
