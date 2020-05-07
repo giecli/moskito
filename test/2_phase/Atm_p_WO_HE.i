@@ -32,19 +32,20 @@
 
 [Materials]
   [./area]
-    type = MoskitoFluidWell2P
+    type = MoskitoFluidWell_2p
     well_diameter = 0.1
     pressure = p
     enthalpy = h
     flowrate = q
     well_direction = x
+    well_type = production
     eos_uo = eos
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
     roughness_type = smooth
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'gas_velocity liquid_velocity void_fraction mass_fraction flow_pattern current_phase gas_density liquid_density density temperature well_velocity'
+    output_properties = 'profile_mixture_density gas_velocity liquid_velocity void_fraction mass_fraction flow_pattern current_phase gas_density liquid_density density temperature well_velocity flow_type_c0 drift_velocity'
   [../]
 []
 
@@ -89,13 +90,13 @@
     variable = h
   [../]
   [./pkernel]
-    type = MoskitoMass
+    type = MoskitoMass_2p1c
     variable = p
     flowrate = q
     enthalpy = h
   [../]
   [./qkernel]
-    type = MoskitoMomentum
+    type = MoskitoMomentum_2p
     variable = q
     pressure = p
     enthalpy = h

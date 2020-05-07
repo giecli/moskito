@@ -21,34 +21,47 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoDFGVar.h"
+#pragma once
 
-MoskitoDFGVar::MoskitoDFGVar(Real v_m, Real rho_g, Real rho_l, const Real & mfrac,
-  Real dia, const Real & dir, const Real & friction, const RealVectorValue & gravity,
-  const RealVectorValue & well_dir)
-  : _FlowPat(0),
-    _v_sg(0.0),
-    _v_sl(0.0),
-    _C0(0.0),
-    _vd(0.0),
-    _v_m(fabs(v_m)),
-    _rho_g(rho_g),
-    _rho_l(rho_l),
-    _mfrac(mfrac),
-    _dia(dia),
-    _dir(dir),
-    _friction(friction),
-    _gravity(gravity),
-    _well_dir(well_dir),
-    _grav(_gravity.norm()),
-    _angle(acos(fabs(_gravity * _well_dir / _grav)))
-{
-}
+#include "Kernel.h"
 
-void
-MoskitoDFGVar::DFMOutput(Real & FlowPat, Real & C0, Real & vd)
+class MoskitoMass_2p1c;
+
+template <>
+InputParameters validParams<MoskitoMass_2p1c>();
+
+class MoskitoMass_2p1c : public Kernel
 {
-  FlowPat = _FlowPat;
-  C0 = _C0;
-  vd = _vd;
-}
+public:
+  MoskitoMass_2p1c(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
+
+  // The coupled flow_rate
+  const VariableValue & _q;
+
+  // The gradient of the coupled flow_rate
+  const VariableGradient & _grad_q;
+  // The gradient of the coupled specific enthalpy
+  const VariableGradient & _grad_h;
+
+  // Variable numberings
+  unsigned _q_var_number;
+  unsigned _h_var_number;
+
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The unit vector of well direction
+  const MaterialProperty<RealVectorValue> & _well_dir;
+  // The sign of well flow direction
+  const MaterialProperty<Real> & _well_sign;
+  // The density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh;
+};

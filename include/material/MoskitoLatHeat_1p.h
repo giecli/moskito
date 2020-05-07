@@ -23,7 +23,6 @@
 
 #pragma once
 
-
 #include "Material.h"
 #include "Function.h"
 #include "NewtonIteration.h"
