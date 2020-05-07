@@ -27,20 +27,20 @@
 #include "Function.h"
 #include "NewtonIteration.h"
 
-class MoskitoLatHeatIterationXiong;
+class MoskitoLatHeat_1p;
 
 template <>
-InputParameters validParams<MoskitoLatHeatIterationXiong>();
+InputParameters validParams<MoskitoLatHeat_1p>();
 
-class MoskitoLatHeatIterationXiong : public Material, public NewtonIteration
+class MoskitoLatHeat_1p : public Material, public NewtonIteration
 {
 public:
-  MoskitoLatHeatIterationXiong(const InputParameters & parameters);
+  MoskitoLatHeat_1p(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
   virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;
   virtual Real computeResidual(const Real trail_value, const Real scalar) override;
-  virtual Real computeDerivative(const Real trailn_value, const Real scalar) override;
+  virtual Real computeDerivative(const Real trail_value, const Real scalar) override;
   virtual Real initialGuess(const Real trail_value) override;
   virtual Real minimumPermissibleValue(const Real trail_value) const override
   {
@@ -52,6 +52,8 @@ public:
   }
 
 protected:
+  // The coupled temperature
+  const VariableValue & _T;
   // Calculate transient time function according to Ramey
   Real transienttimefunction(Real Uto);
   // Calculate deoth dependent formation temperature
@@ -70,8 +72,6 @@ protected:
   Real Grashof(Real Uto, Real Temp, Real grav);
   // Calculate Rayleigh Number needed for hc calculation
   Real Rayleigh(Real grav,Real Uto, Real Temp);
-  // temperature
-  const MaterialProperty<Real> & _T;
   // Radius tubing outer
   MaterialProperty<Real> & _RadTubout;
   // Variable to output formation temperature

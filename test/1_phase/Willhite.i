@@ -13,7 +13,7 @@
 
 [UserObjects]
   [./eos]
-    type = MoskitoEOS1P_PureWater
+    type = MoskitoEOS1P_IdealFluid
   [../]
   [./viscosity]
     type = MoskitoViscosityWaterSmith
@@ -32,8 +32,9 @@
   [./area0]
     type = MoskitoFluidWell1P
     pressure = p
-    enthalpy = h
+    temperature = T
     flowrate = q
+    well_type = injection
     well_direction = x
     well_diameter = 0.0890016
     eos_uo = eos
@@ -43,7 +44,8 @@
     # outputs = exodus
   [../]
   [./Lateral]
-    type = MoskitoLatHeatIterationXiong
+    type = MoskitoLatHeat_1p
+     temperature = T
      # Geometry of the well. As the example did not contain any tubing radius, which is required for teh material it was artificially set to a small radius
      well_diameter_vector = '0.0890016 0.089001602 0.216408 0.24384 0.3048'
      conductivities_vector = '80.42534006 0.0 80.42534006 0.346146923'
@@ -70,32 +72,30 @@
 []
 
 [Variables]
-  [./h]
-    initial_condition = 3084930
+  [./T]
+    initial_condition = 588.70555
   [../]
   [./p]
     initial_condition = 1.0e6
   [../]
   [./q]
-    initial_condition = -0.01
+    initial_condition = 0.01
   [../]
 []
 
 [BCs]
   [./hbc]
-    type = MoskitoTemperatureToEnthalpy1P
-    variable = h
-    pressure = p
+    type = DirichletBC
+    variable = T
     boundary = left
-    temperature = 588.70555
-    eos_uo = eos
+    value = 588.70555
   [../]
 [../]
 
 [Kernels]
   [./hkernel]
-    type = MoskitoEnergy
-    variable = h
+    type = MoskitoEnergy_1p1c
+    variable = T
     pressure = p
     flowrate = q
   [../]
@@ -108,8 +108,8 @@
     variable = q
   [../]
   [./heat]
-    type = MoskitoHeat
-    variable = h
+    type = MoskitoLateralHeat_1p
+    variable = T
   [../]
 []
 
