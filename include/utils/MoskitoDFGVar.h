@@ -34,7 +34,7 @@ public:
     const Real & dir, const Real & friction, const RealVectorValue & gravity,
     const RealVectorValue & well_dir);
 
-  void DFMOutput(Real & FlowPat, Real & v_sg, Real & v_sl, Real & C0, Real & vd);
+  void DFMOutput(Real & FlowPat, Real & C0, Real & vd);
 
   // Flow pattern 0 = nothing, 1 = bubbly, 2 = dispersed_bubbly, 3 = slug, 4 = churn, 5 = annular
   Real _FlowPat;
@@ -56,7 +56,7 @@ public:
   // Well diameter
   Real _dia;
   // Flow direction
-  const Real _dir;
+  Real _dir;
   // Well friction
   const Real _friction;
   // The gravity acceleration as a vector

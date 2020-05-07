@@ -114,7 +114,7 @@ MoskitoFluidWell_2p::computeQpProperties()
     MoskitoDFGVar DFinp(_u[_qp], _rho_g[_qp], _rho_l[_qp], _vmfrac[_qp],
       _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
     dfm_uo.DFMCalculator(DFinp);
-      DFinp.DFMOutput(_flow_pat[_qp], _v_sg[_qp], _v_sl[_qp], _c0[_qp], _u_d[_qp]);
+      DFinp.DFMOutput(_flow_pat[_qp], _c0[_qp], _u_d[_qp]);
   }
   else
   {
@@ -122,13 +122,6 @@ MoskitoFluidWell_2p::computeQpProperties()
     _c0[_qp] = 1.0;
     _u_d[_qp] = 0.0;
   }
-
-  // these modifications should be done in HK model not in material
-  // Normalised HK c0 by max c0
-  _c0[_qp] /= 1.2;
-  // correction for ud sign in Basti model
-  if (_well_sign[_qp] == 1.0)
-    _u_d[_qp] *= -1.0;
 
   _rho_pam[_qp] = _rho_g[_qp] * _c0[_qp]  * _vfrac[_qp] + (1.0 - _vfrac[_qp] * _c0[_qp]) * _rho_l[_qp];
 

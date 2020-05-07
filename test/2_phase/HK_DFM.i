@@ -31,12 +31,12 @@
 
 [Materials]
   [./area0]
-    type = MoskitoFluidWell2P
+    type = MoskitoFluidWell_2p
     pressure = p
     enthalpy = h
     flowrate = q
     well_direction = x
-    well_type = injection
+    well_type = production
     eos_uo = eos
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
