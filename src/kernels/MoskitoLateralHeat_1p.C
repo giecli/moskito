@@ -49,10 +49,18 @@ Real
 MoskitoLateralHeat_1p::computeQpResidual()
 {
   Real r = 0.0;
-  r =  2.0 * PI * _rto[_qp] * _Uto[_qp];
-  r *= ((_u[_qp]) - _Twb[_qp]);
+  r =  2.0 * PI * _rto[_qp] * _Uto[_qp] * (_u[_qp] - _Twb[_qp]);
   r /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
-  r *= _test[_i][_qp];
 
-  return  r;
+  return  r * _test[_i][_qp];
+}
+
+Real
+MoskitoLateralHeat_1p::computeQpJacobian()
+{
+  Real j = 0.0;
+  j =  2.0 * PI * _rto[_qp] * _Uto[_qp] * _phi[_j][_qp];
+  j /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
+
+  return  j * _test[_i][_qp];
 }

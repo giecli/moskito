@@ -37,6 +37,8 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+
   // Radius tubing outer
   const MaterialProperty<Real> & _rto;
   // Thermal wellbore resistivity
