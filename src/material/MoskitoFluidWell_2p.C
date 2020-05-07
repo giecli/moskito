@@ -89,7 +89,6 @@ MoskitoFluidWell_2p::computeQpProperties()
   _rho_l[_qp] = eos_uo.rho_l_from_p_T(fabs(_P[_qp]), _T[_qp], _phase[_qp]);
   _rho_g[_qp] = eos_uo.rho_g_from_p_T(fabs(_P[_qp]), _T[_qp], _phase[_qp]);
   _vfrac[_qp]  = (_rho_m[_qp] - _rho_l[_qp]) / (_rho_g[_qp] - _rho_l[_qp]);
-  _rho_pam[_qp] = _rho_g[_qp] * _c0[_qp]  * _vfrac[_qp] + (1.0 - _vfrac[_qp] * _c0[_qp]) * _rho_l[_qp];
   _cp_m[_qp]  = eos_uo.cp_m_from_p_T(fabs(_P[_qp]), _T[_qp], _vmfrac[_qp], _phase[_qp]);
 
   _dia[_qp] = _d;
@@ -105,7 +104,7 @@ MoskitoFluidWell_2p::computeQpProperties()
   }
 
   _u[_qp] = _flow[_qp] / _area[_qp];
-  _Re[_qp] = _rho_m[_qp] * _dia[_qp] * fabs(_u[_qp]) / viscosity_uo.mixture_mu(_P[_qp], _T[_qp], _vmfrac[_qp]);
+  _Re[_qp] = _rho_m[_qp] * _dia[_qp] * _u[_qp] / viscosity_uo.mixture_mu(_P[_qp], _T[_qp], _vmfrac[_qp]);
 
   MoskitoFluidWellGeneral::computeQpProperties();
 
@@ -130,6 +129,8 @@ MoskitoFluidWell_2p::computeQpProperties()
   // correction for ud sign in Basti model
   if (_well_sign[_qp] == 1.0)
     _u_d[_qp] *= -1.0;
+
+  _rho_pam[_qp] = _rho_g[_qp] * _c0[_qp]  * _vfrac[_qp] + (1.0 - _vfrac[_qp] * _c0[_qp]) * _rho_l[_qp];
 
   // based on mass weighted flow rate
   // momentum eq is valid only by mass mixing flow rate
