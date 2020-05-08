@@ -65,8 +65,6 @@ protected:
   MaterialProperty<Real> & _drho_m_dp;
   // The second derivative of mixture density wrt pressure
   MaterialProperty<Real> & _drho_m_dp_2;
-  // The first derivative of mixture density wrt temperature
-  MaterialProperty<Real> & _drho_m_dT;
   // The first derivative of mixture density wrt enthalpy
   MaterialProperty<Real> & _drho_m_dh;
   // The second derivative of mixture density wrt enthalpy

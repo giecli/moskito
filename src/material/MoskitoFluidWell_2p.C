@@ -53,7 +53,6 @@ MoskitoFluidWell_2p::MoskitoFluidWell_2p(const InputParameters & parameters)
     _rho_pam(declareProperty<Real>("profile_mixture_density")),
     _drho_m_dp(declareProperty<Real>("drho_dp")),
     _drho_m_dp_2(declareProperty<Real>("drho_dp_2")),
-    _drho_m_dT(declareProperty<Real>("drho_dT")),
     _drho_m_dh(declareProperty<Real>("drho_dh")),
     _drho_m_dh_2(declareProperty<Real>("drho_dh_2")),
     _vmfrac(declareProperty<Real>("mass_fraction")),
