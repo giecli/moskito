@@ -21,13 +21,13 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoFluidWell_2p.h"
+#include "MoskitoFluidWell_2p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoFluidWell_2p);
+registerMooseObject("MoskitoApp", MoskitoFluidWell_2p1c);
 
 template <>
 InputParameters
-validParams<MoskitoFluidWell_2p>()
+validParams<MoskitoFluidWell_2p1c>()
 {
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
   params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable (J/kg)");
@@ -40,7 +40,7 @@ validParams<MoskitoFluidWell_2p>()
   return params;
 }
 
-MoskitoFluidWell_2p::MoskitoFluidWell_2p(const InputParameters & parameters)
+MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
   : MoskitoFluidWellGeneral(parameters),
     eos_uo(getUserObject<MoskitoEOS2P>("eos_uo")),
     viscosity_uo(getUserObject<MoskitoViscosity2P>("viscosity_uo")),
@@ -79,7 +79,7 @@ MoskitoFluidWell_2p::MoskitoFluidWell_2p(const InputParameters & parameters)
 }
 
 void
-MoskitoFluidWell_2p::computeQpProperties()
+MoskitoFluidWell_2p1c::computeQpProperties()
 {
   // calculate required properties based on the given EOS
   eos_uo.VMFrac_T_from_p_h(fabs(_P[_qp]), _h[_qp], _vmfrac[_qp], _T[_qp], _phase[_qp]);
@@ -164,7 +164,7 @@ MoskitoFluidWell_2p::computeQpProperties()
 }
 
 Real
-MoskitoFluidWell_2p::gamma(const Real & h, const Real & p, const Real & q)
+MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
 {
   Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, rho_pam;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
@@ -183,7 +183,7 @@ MoskitoFluidWell_2p::gamma(const Real & h, const Real & p, const Real & q)
 }
 
 void
-MoskitoFluidWell_2p::GammaDerivatives()
+MoskitoFluidWell_2p1c::GammaDerivatives()
 {
   Real dh, dq, dp;
   Real tol = 1.0e-5;

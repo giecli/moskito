@@ -28,15 +28,15 @@
 #include "MoskitoViscosity2P.h"
 #include "MoskitoDriftFlux.h"
 
-class MoskitoFluidWell_2p;
+class MoskitoFluidWell_2p1c;
 
 template <>
-InputParameters validParams<MoskitoFluidWell_2p>();
+InputParameters validParams<MoskitoFluidWell_2p1c>();
 
-class MoskitoFluidWell_2p : public MoskitoFluidWellGeneral
+class MoskitoFluidWell_2p1c : public MoskitoFluidWellGeneral
 {
 public:
-  MoskitoFluidWell_2p(const InputParameters & parameters);
+  MoskitoFluidWell_2p1c(const InputParameters & parameters);
   virtual void computeQpProperties() override;
   void GammaDerivatives();
   Real gamma(const Real & h, const Real & p, const Real & q);

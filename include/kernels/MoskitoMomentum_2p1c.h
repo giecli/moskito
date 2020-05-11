@@ -26,15 +26,15 @@
 
 #include "Kernel.h"
 
-class MoskitoMomentum_2p;
+class MoskitoMomentum_2p1c;
 
 template <>
-InputParameters validParams<MoskitoMomentum_2p>();
+InputParameters validParams<MoskitoMomentum_2p1c>();
 
-class MoskitoMomentum_2p : public Kernel
+class MoskitoMomentum_2p1c : public Kernel
 {
 public:
-  MoskitoMomentum_2p(const InputParameters & parameters);
+  MoskitoMomentum_2p1c(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

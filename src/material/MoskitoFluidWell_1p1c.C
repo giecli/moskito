@@ -21,13 +21,13 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoFluidWell1P.h"
+#include "MoskitoFluidWell_1p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoFluidWell1P);
+registerMooseObject("MoskitoApp", MoskitoFluidWell_1p1c);
 
 template <>
 InputParameters
-validParams<MoskitoFluidWell1P>()
+validParams<MoskitoFluidWell_1p1c>()
 {
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
   params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable (K)");
@@ -39,7 +39,7 @@ validParams<MoskitoFluidWell1P>()
   return params;
 }
 
-MoskitoFluidWell1P::MoskitoFluidWell1P(const InputParameters & parameters)
+MoskitoFluidWell_1p1c::MoskitoFluidWell_1p1c(const InputParameters & parameters)
   : MoskitoFluidWellGeneral(parameters),
     eos_uo(getUserObject<MoskitoEOS1P>("eos_uo")),
     viscosity_uo(getUserObject<MoskitoViscosity1P>("viscosity_uo")),
@@ -53,7 +53,7 @@ MoskitoFluidWell1P::MoskitoFluidWell1P(const InputParameters & parameters)
 }
 
 void
-MoskitoFluidWell1P::computeQpProperties()
+MoskitoFluidWell_1p1c::computeQpProperties()
 {
   _cp[_qp] = eos_uo.cp(_P[_qp], _T[_qp]);
   _h[_qp] = eos_uo.h_from_p_T(_P[_qp], _T[_qp]);

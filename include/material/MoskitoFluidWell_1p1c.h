@@ -27,15 +27,15 @@
 #include "MoskitoEOS1P.h"
 #include "MoskitoViscosity1P.h"
 
-class MoskitoFluidWell1P;
+class MoskitoFluidWell_1p1c;
 
 template <>
-InputParameters validParams<MoskitoFluidWell1P>();
+InputParameters validParams<MoskitoFluidWell_1p1c>();
 
-class MoskitoFluidWell1P : public MoskitoFluidWellGeneral
+class MoskitoFluidWell_1p1c : public MoskitoFluidWellGeneral
 {
 public:
-  MoskitoFluidWell1P(const InputParameters & parameters);
+  MoskitoFluidWell_1p1c(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
 protected:

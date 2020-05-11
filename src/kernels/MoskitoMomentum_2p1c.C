@@ -21,13 +21,13 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoMomentum_2p.h"
+#include "MoskitoMomentum_2p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoMomentum_2p);
+registerMooseObject("MoskitoApp", MoskitoMomentum_2p1c);
 
 template <>
 InputParameters
-validParams<MoskitoMomentum_2p>()
+validParams<MoskitoMomentum_2p1c>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -38,7 +38,7 @@ validParams<MoskitoMomentum_2p>()
   return params;
 }
 
-MoskitoMomentum_2p::MoskitoMomentum_2p(const InputParameters & parameters)
+MoskitoMomentum_2p1c::MoskitoMomentum_2p1c(const InputParameters & parameters)
   : Kernel(parameters),
     _grad_p(coupledGradient("pressure")),
     _grad_h(coupledGradient("enthalpy")),
@@ -63,7 +63,7 @@ MoskitoMomentum_2p::MoskitoMomentum_2p(const InputParameters & parameters)
 }
 
 Real
-MoskitoMomentum_2p::computeQpResidual()
+MoskitoMomentum_2p1c::computeQpResidual()
 {
   RealVectorValue r = 0.0;
 
@@ -85,7 +85,7 @@ MoskitoMomentum_2p::computeQpResidual()
 }
 
 Real
-MoskitoMomentum_2p::computeQpJacobian()
+MoskitoMomentum_2p1c::computeQpJacobian()
 {
   RealVectorValue j = 0.0;
 
@@ -107,7 +107,7 @@ MoskitoMomentum_2p::computeQpJacobian()
 }
 
 Real
-MoskitoMomentum_2p::computeQpOffDiagJacobian(unsigned int jvar)
+MoskitoMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
   RealVectorValue j = 0.0;
 

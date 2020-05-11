@@ -32,7 +32,7 @@
 
 [Materials]
   [./area]
-    type = MoskitoFluidWell_2p
+    type = MoskitoFluidWell_2p1c
     well_diameter = 0.1
     pressure = p
     enthalpy = h
@@ -93,7 +93,7 @@
     enthalpy = h
   [../]
   [./qkernel]
-    type = MoskitoMomentum_2p
+    type = MoskitoMomentum_2p1c
     variable = q
     pressure = p
     enthalpy = h
