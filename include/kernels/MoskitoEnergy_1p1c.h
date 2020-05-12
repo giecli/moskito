@@ -21,20 +21,19 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOMASS_H
-#define MOSKITOMASS_H
+#pragma once
 
 #include "Kernel.h"
 
-class MoskitoMass;
+class MoskitoEnergy_1p1c;
 
 template <>
-InputParameters validParams<MoskitoMass>();
+InputParameters validParams<MoskitoEnergy_1p1c>();
 
-class MoskitoMass : public Kernel
+class MoskitoEnergy_1p1c : public Kernel
 {
 public:
-  MoskitoMass(const InputParameters & parameters);
+  MoskitoEnergy_1p1c(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
@@ -42,31 +41,36 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
   // The coupled flow_rate
-  const VariableValue & _q_vol;
+  const VariableValue & _q;
 
   // The gradient of the coupled flow_rate
-  const VariableGradient & _grad_q_vol;
-  // The gradient of the coupled specific enthalpy
-  const VariableGradient & _grad_h;
+  const VariableGradient & _grad_q;
+  // The gradient of the coupled pressure
+  const VariableGradient & _grad_p;
 
   // Variable numberings
-  unsigned _q_vol_var_number;
-  unsigned _h_var_number;
+  unsigned _q_var_number;
+  unsigned _p_var_number;
 
   // The area of pipe
   const MaterialProperty<Real> & _area;
   // The unit vector of well direction
   const MaterialProperty<RealVectorValue> & _well_dir;
+  // The sign of well flow direction
+  const MaterialProperty<Real> & _well_sign;
+  // The thermal conductivity of casing and fluid
+  const MaterialProperty<Real> & _lambda;
+  // The specific heat at constant pressure
+  const MaterialProperty<Real> & _cp;
   // The density
   const MaterialProperty<Real> & _rho;
   // The first derivative of density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
   // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-};
+  const MaterialProperty<Real> & _drho_dT;
+  // Enthalpy from P and T
+  const MaterialProperty<Real> & _h;
 
-#endif // MOSKITOMASS_H
+  // The gravity acceleration as a vector
+  const MaterialProperty<RealVectorValue> & _gravity;
+};

@@ -21,55 +21,66 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoEOS1P_FPModule.h"
+#include "MoskitoTimeMass_2p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoEOS1P_FPModule);
+registerMooseObject("MoskitoApp", MoskitoTimeMass_2p1c);
 
 template <>
 InputParameters
-validParams<MoskitoEOS1P_FPModule>()
+validParams<MoskitoTimeMass_2p1c>()
 {
-  InputParameters params = validParams<MoskitoEOS1P>();
+  InputParameters params = validParams<TimeKernel>();
 
-  params.addRequiredParam<UserObjectName>("SinglePhase_fp",
-          "The name of the FluidProperties UserObject");
+  params.addRequiredCoupledVar("enthalpy", "Enthalpy nonlinear variable");
+  params.addClassDescription("Time derivative part of mass conservation equation for "
+                  "2 phase pipe flow and it returns pressure");
 
   return params;
 }
 
-MoskitoEOS1P_FPModule::MoskitoEOS1P_FPModule(const InputParameters & parameters)
-  : MoskitoEOS1P(parameters),
-    _fp_eos(getUserObject<SinglePhaseFluidProperties>("SinglePhase_fp"))
+MoskitoTimeMass_2p1c::MoskitoTimeMass_2p1c(const InputParameters & parameters)
+  : TimeKernel(parameters),
+    _h_dot(coupledDot("enthalpy")),
+    _dh_dot(coupledDotDu("enthalpy")),
+    _h_var_number(coupled("enthalpy")),
+    _drho_dp(getMaterialProperty<Real>("drho_dp")),
+    _drho_dh(getMaterialProperty<Real>("drho_dh"))
 {
 }
 
 Real
-MoskitoEOS1P_FPModule::h_from_p_T(const Real & pressure, const Real & temperature) const
+MoskitoTimeMass_2p1c::computeQpResidual()
 {
-  return _fp_eos.h_from_p_T(pressure, temperature);
+  Real r = 0.0;
+
+  r += _drho_dp[_qp] * _u_dot[_qp];
+  r += _drho_dh[_qp] * _h_dot[_qp];
+  r *= _test[_i][_qp];
+
+  return r;
 }
 
 Real
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature) const
+MoskitoTimeMass_2p1c::computeQpJacobian()
 {
-  return _fp_eos.rho_from_p_T(pressure, temperature);
-}
+  Real j = 0.0;
 
-void
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature,
-                            Real & rho, Real & drho_dp, Real & drho_dT) const
-{
-  _fp_eos.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-}
+  j += _drho_dp[_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
+  j *= _test[_i][_qp];
 
-Real
-MoskitoEOS1P_FPModule::cp(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.cp_from_p_T(pressure, temperature);
+  return j;
 }
 
 Real
-MoskitoEOS1P_FPModule::lambda(const Real & pressure, const Real & temperature) const
+MoskitoTimeMass_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return _fp_eos.k_from_p_T(pressure, temperature);
+  Real j = 0.0;
+
+  if (jvar == _h_var_number)
+  {
+    j += _drho_dh[_qp] * _phi[_j][_qp] * _dh_dot[_qp];
+    j *= _test[_i][_qp];
+  }
+
+  return j;
 }

@@ -21,39 +21,32 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOTIMEMASS_H
-#define MOSKITOTIMEMASS_H
+#pragma once
 
 #include "TimeKernel.h"
 
-class MoskitoTimeMass;
+class MoskitoTimeMass_1p1c;
 
 template <>
-InputParameters validParams<MoskitoTimeMass>();
+InputParameters validParams<MoskitoTimeMass_1p1c>();
 
-class MoskitoTimeMass : public TimeKernel
+class MoskitoTimeMass_1p1c : public TimeKernel
 {
 public:
-  MoskitoTimeMass(const InputParameters & parameters);
+  MoskitoTimeMass_1p1c(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  // required values for enthalpy coupling
-  const VariableValue & _h_dot;
-  const VariableValue & _dh_dot;
-  const unsigned int _h_var_number;
+  // required values for temperature coupling
+  const VariableValue & _T_dot;
+  const VariableValue & _dT_dot;
+  const unsigned int _T_var_number;
 
   // The first derivative of density wrt pressure
   const MaterialProperty<Real> & _drho_dp;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
+  // The first derivative of density wrt temperature
+  const MaterialProperty<Real> & _drho_dT;
 };
-
-#endif // MOSKITOTIMEMASS_H

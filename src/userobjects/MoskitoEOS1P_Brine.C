@@ -21,68 +21,60 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoEOS1P_PureWater.h"
+#include "MoskitoEOS1P_Brine.h"
 
-registerMooseObject("MoskitoApp", MoskitoEOS1P_PureWater);
+registerMooseObject("MoskitoApp", MoskitoEOS1P_Brine);
 
 template <>
 InputParameters
-validParams<MoskitoEOS1P_PureWater>()
+validParams<MoskitoEOS1P_Brine>()
 {
   InputParameters params = validParams<MoskitoEOS1P>();
+  params.addParam<Real>("specific_heat", 4200,
+        "Constant specific heat at constant pressure (J/kg.K)");
+  params.addParam<Real>("thermal_conductivity", 0.6,
+        "Constant thermal conductivity (W/m/K)");
+  params.addParam<Real>("NaCl_concentration", 0.25,
+        "Concentration of NaCl (0.25<molal<5)");
 
   return params;
 }
 
-MoskitoEOS1P_PureWater::MoskitoEOS1P_PureWater(const InputParameters & parameters)
-  : MoskitoEOS1P(parameters)
+MoskitoEOS1P_Brine::MoskitoEOS1P_Brine(const InputParameters & parameters)
+  : MoskitoEOS1P(parameters),
+    _cp(getParam<Real>("specific_heat")),
+    _lambda(getParam<Real>("thermal_conductivity")),
+    _m(getParam<Real>("NaCl_concentration"))
 {
-  std::string eos_name = UserObjectName(name() + ":LiquidGas");
-  {
-    std::string class_name = "MoskitoWater97FluidProperties";
-    InputParameters params = _app.getFactory().getValidParams(class_name);
-    _fe_problem.addUserObject(class_name, eos_name, params);
-  }
-  _eos_1P = &_fe_problem.getUserObjectTempl<MoskitoWater97FluidProperties>(eos_name);
 }
 
 Real
-MoskitoEOS1P_PureWater::rho_from_p_T(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P_Brine::rho_from_p_T(const Real & pressure, const Real & temperature) const
 {
-  return _eos_1P->rho_from_p_T(pressure, temperature);
+  if (pressure <0.0 || pressure > 5e7 || temperature <273.15)
+    mooseError("The pressure or temperature is out of the range.");
+  Real _a = -9.9559*std::exp(-4.539e-3*_m) + 7.0845*std::exp(-1.638e-4*(temperature-273.15))+3.909*std::exp(2.551e-10*pressure);
+  return (-3.033405 + 10.128163*_a - 8.750567*_a*_a + 2.663107*_a*_a*_a)*1.0e3;
 }
 
 void
-MoskitoEOS1P_PureWater::rho_from_p_T(const Real & pressure, const Real & temperature,
+MoskitoEOS1P_Brine::rho_from_p_T(const Real & pressure, const Real & temperature,
                               Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  _eos_1P->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+  rho = this->rho_from_p_T(pressure, temperature);
+  Real _a = -9.9559*std::exp(-4.539e-3*_m) + 7.0845*std::exp(-1.638e-4*(temperature-273.15))+3.909*std::exp(2.551e-10*pressure);
+  drho_dp = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*9.971859e-10*std::exp(2.551e-10*pressure);
+  drho_dT = (10.128163 - 17.501134*_a + 7.989321*_a*_a)*-1.1604411e-3*std::exp(-1.638e-4*(temperature-273.15));
 }
 
 Real
-MoskitoEOS1P_PureWater::h_to_T(const Real & pressure, const Real & enthalpy) const
+MoskitoEOS1P_Brine::cp(const Real & pressure, const Real & temperature) const
 {
-  unsigned int region = _eos_1P->inRegionPH(pressure, enthalpy);
-  if (region == 4)
-    mooseError(name(), "This EOS is not valid for 2 phase region");
-
-  return _eos_1P->temperature_from_ph(pressure, enthalpy);
+  return _cp;
 }
 
 Real
-MoskitoEOS1P_PureWater::T_to_h(const Real & pressure, const Real & temperature) const
+MoskitoEOS1P_Brine::lambda(const Real & pressure, const Real & temperature) const
 {
-  return _eos_1P->h_from_p_T(pressure, temperature);
-}
-
-Real
-MoskitoEOS1P_PureWater::cp(const Real & pressure, const Real & temperature) const
-{
-  return _eos_1P->cp_from_p_T(pressure, temperature);
-}
-
-Real
-MoskitoEOS1P_PureWater::lambda(const Real & pressure, const Real & temperature) const
-{
-return _eos_1P->k_from_p_T(pressure, temperature);
+  return _lambda;
 }

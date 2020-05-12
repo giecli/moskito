@@ -1,3 +1,4 @@
+
 /**************************************************************************/
 /*  MOSKITO - Multiphysics cOupled Simulator toolKIT for wellbOres        */
 /*                                                                        */
@@ -21,39 +22,62 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOHEAT_H
-#define MOSKITOHEAT_H
+#pragma once
 
 #include "Kernel.h"
 
-class MoskitoHeat;
+class MoskitoMomentum_2p1c;
 
 template <>
-InputParameters validParams<MoskitoHeat>();
+InputParameters validParams<MoskitoMomentum_2p1c>();
 
-class MoskitoHeat : public Kernel
+class MoskitoMomentum_2p1c : public Kernel
 {
 public:
-  MoskitoHeat(const InputParameters & parameters);
+  MoskitoMomentum_2p1c(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // temperature
-  const MaterialProperty<Real> & _T;
-  // Radius tubing outer
-  const MaterialProperty<Real> & _rto;
-  // Thermal wellbore resistivity
-  const MaterialProperty<Real> & _Uto;
-  // Temperature at formation - cement boundary
-  const MaterialProperty<Real> & _Twb;
-  // Diameter filled with liquid = _rti
-  const MaterialProperty<Real> & _diameter_liquid;
-  const Real gradC_to_gradR = 1.8;
-  const Real Watt_to_Btu_per_h = 3.412141633;
-  const Real m_to_ft    = 3.280839895;
-  const Real Rankine_absol = 491.67;
-  const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
+  // The gradient of the coupled pressure
+  const VariableGradient & _grad_p;
+  // The gradient of the coupled specific enthalpy
+  const VariableGradient & _grad_h;
+
+  // Variable numberings
+  unsigned _p_var_number;
+  unsigned _h_var_number;
+
+  // The mixture density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of mixture density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of mixture density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh;
+  // The pipe Moody friction factor
+  const MaterialProperty<Real> & _f;
+  // The gravity acceleration as a vector
+  const MaterialProperty<RealVectorValue> & _gravity;
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The wetted perimeter of pipe
+  const MaterialProperty<Real> & _perimeter;
+  // The unit vector of well direction
+  const MaterialProperty<RealVectorValue> & _well_dir;
+  // The flow direction
+  const MaterialProperty<Real> & _well_sign;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dh;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dp;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dhq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dpq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dq2;
 };
-
-#endif // MOSKITOHEAT_H

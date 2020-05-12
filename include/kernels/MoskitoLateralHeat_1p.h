@@ -21,59 +21,35 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOENERGY_H
-#define MOSKITOENERGY_H
+#pragma once
 
 #include "Kernel.h"
 
-class MoskitoEnergy;
+class MoskitoLateralHeat_1p;
 
 template <>
-InputParameters validParams<MoskitoEnergy>();
+InputParameters validParams<MoskitoLateralHeat_1p>();
 
-class MoskitoEnergy : public Kernel
+class MoskitoLateralHeat_1p : public Kernel
 {
 public:
-  MoskitoEnergy(const InputParameters & parameters);
+  MoskitoLateralHeat_1p(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // The coupled flow_rate
-  const VariableValue & _q_vol;
-
-  // The gradient of the coupled flow_rate
-  const VariableGradient & _grad_q_vol;
-  // The gradient of the coupled pressure
-  const VariableGradient & _grad_p;
-
-  // Variable numberings
-  unsigned _q_vol_var_number;
-  unsigned _p_var_number;
-
-  // The area of pipe
-  const MaterialProperty<Real> & _area;
-  // The unit vector of well direction
-  const MaterialProperty<RealVectorValue> & _well_dir;
-  // The thermal conductivity of casing and fluid
-  const MaterialProperty<Real> & _lambda;
-  // The specific heat at constant pressure
-  const MaterialProperty<Real> & _cp;
-  // The density
-  const MaterialProperty<Real> & _rho;
-  // The first derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-
-  // The gravity acceleration as a vector
-  const MaterialProperty<RealVectorValue> & _gravity;
+  // Radius tubing outer
+  const MaterialProperty<Real> & _rto;
+  // Thermal wellbore resistivity
+  const MaterialProperty<Real> & _Uto;
+  // Temperature at formation - cement boundary
+  const MaterialProperty<Real> & _Twb;
+  // Diameter filled with liquid = _rti
+  const MaterialProperty<Real> & _diameter_liquid;
+  const Real gradC_to_gradR = 1.8;
+  const Real Watt_to_Btu_per_h = 3.412141633;
+  const Real m_to_ft    = 3.280839895;
+  const Real Rankine_absol = 491.67;
+  const Real PI = 3.141592653589793238462643383279502884197169399375105820974944592308;
 };
-
-#endif // MOSKITOENERGY_H

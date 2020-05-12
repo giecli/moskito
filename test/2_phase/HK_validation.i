@@ -31,18 +31,19 @@
 
 [Materials]
   [./area0]
-    type = MoskitoFluidWell2P
+    type = MoskitoFluidWell_2p1c
     pressure = p
     enthalpy = h
     flowrate = q
     well_direction = x
+    well_type = production
     eos_uo = eos
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
     well_diameter = 0.05
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'well_velocity void_fraction flow_pattern current_phase drift_velocity flow_type_c0 volFrac_HK superficial_gas_velocity superficial_liquid_velocity'
+    output_properties = 'well_velocity void_fraction flow_pattern current_phase drift_velocity flow_type_c0 gas_velocity liquid_velocity'
   [../]
 []
 

@@ -21,72 +21,47 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOMOMENTUM_H
-#define MOSKITOMOMENTUM_H
+#pragma once
 
 #include "Kernel.h"
 
-class MoskitoMomentum;
+class MoskitoMass_2p1c;
 
 template <>
-InputParameters validParams<MoskitoMomentum>();
+InputParameters validParams<MoskitoMass_2p1c>();
 
-class MoskitoMomentum : public Kernel
+class MoskitoMass_2p1c : public Kernel
 {
 public:
-  MoskitoMomentum(const InputParameters & parameters);
+  MoskitoMass_2p1c(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // The gradient of the coupled pressure
-  const VariableGradient & _grad_p;
+  // The coupled flow_rate
+  const VariableValue & _q;
+
+  // The gradient of the coupled flow_rate
+  const VariableGradient & _grad_q;
   // The gradient of the coupled specific enthalpy
   const VariableGradient & _grad_h;
 
   // Variable numberings
-  unsigned _p_var_number;
+  unsigned _q_var_number;
   unsigned _h_var_number;
 
-  // The mixture density
-  const MaterialProperty<Real> & _rho;
-  // The first derivative of mixture density wrt pressure
-  const MaterialProperty<Real> & _drho_dp;
-  // The second derivative of mixture density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The first derivative of mixture density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of mixture density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The pipe diameter
-  const MaterialProperty<Real> & _d;
-  // The pipe Moody friction factor
-  const MaterialProperty<Real> & _f;
-  // The gravity acceleration as a vector
-  const MaterialProperty<RealVectorValue> & _gravity;
   // The area of pipe
   const MaterialProperty<Real> & _area;
   // The unit vector of well direction
   const MaterialProperty<RealVectorValue> & _well_dir;
-  // The flow direction
-  const MaterialProperty<Real> & _flow_dir;
-
-  // residual for dgamma_dz in the momentum conservation
-  const MaterialProperty<Real> * _dgamma_dz = NULL;
-  // diagonal jacobian of the residual wrt uj for dgamma_dz in the momentum conservation
-  const MaterialProperty<Real> * _dgamma_dz_uj_gphi = NULL;
-  const MaterialProperty<Real> * _dgamma_dz_uj_phi = NULL;
-  // diagonal jacobian of the residual wrt pj for dgamma_dz in the momentum conservation
-  const MaterialProperty<Real> * _dgamma_dz_pj_gphi = NULL;
-  const MaterialProperty<Real> * _dgamma_dz_pj_phi = NULL;
-  // diagonal jacobian of the residual wrt hj for dgamma_dz in the momentum conservation
-  const MaterialProperty<Real> * _dgamma_dz_hj_gphi = NULL;
-  const MaterialProperty<Real> * _dgamma_dz_hj_phi = NULL;
-private:
-  // an indicator for 2 phase flow model
-  bool _2p_ind = false;
+  // The sign of well flow direction
+  const MaterialProperty<Real> & _well_sign;
+  // The density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh;
 };
-
-#endif // MOSKITOMOMENTUM_H

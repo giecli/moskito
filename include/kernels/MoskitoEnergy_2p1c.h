@@ -21,55 +21,54 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoEOS1P_FPModule.h"
+#pragma once
 
-registerMooseObject("MoskitoApp", MoskitoEOS1P_FPModule);
+#include "Kernel.h"
+
+class MoskitoEnergy_2p1c;
 
 template <>
-InputParameters
-validParams<MoskitoEOS1P_FPModule>()
+InputParameters validParams<MoskitoEnergy_2p1c>();
+
+class MoskitoEnergy_2p1c : public Kernel
 {
-  InputParameters params = validParams<MoskitoEOS1P>();
+public:
+  MoskitoEnergy_2p1c(const InputParameters & parameters);
 
-  params.addRequiredParam<UserObjectName>("SinglePhase_fp",
-          "The name of the FluidProperties UserObject");
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  return params;
-}
+  // The coupled flow_rate
+  const VariableValue & _q;
 
-MoskitoEOS1P_FPModule::MoskitoEOS1P_FPModule(const InputParameters & parameters)
-  : MoskitoEOS1P(parameters),
-    _fp_eos(getUserObject<SinglePhaseFluidProperties>("SinglePhase_fp"))
-{
-}
+  // The gradient of the coupled flow_rate
+  const VariableGradient & _grad_q;
+  // The gradient of the coupled pressure
+  const VariableGradient & _grad_p;
 
-Real
-MoskitoEOS1P_FPModule::h_from_p_T(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.h_from_p_T(pressure, temperature);
-}
+  // Variable numberings
+  unsigned _q_var_number;
+  unsigned _p_var_number;
 
-Real
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.rho_from_p_T(pressure, temperature);
-}
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The unit vector of well direction
+  const MaterialProperty<RealVectorValue> & _well_dir;
+  // The sign of well flow direction
+  const MaterialProperty<Real> & _well_sign;
+  // The thermal conductivity of casing and fluid
+  const MaterialProperty<Real> & _lambda;
+  // The specific heat at constant pressure
+  const MaterialProperty<Real> & _cp;
+  // The density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh;
 
-void
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature,
-                            Real & rho, Real & drho_dp, Real & drho_dT) const
-{
-  _fp_eos.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-}
-
-Real
-MoskitoEOS1P_FPModule::cp(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.cp_from_p_T(pressure, temperature);
-}
-
-Real
-MoskitoEOS1P_FPModule::lambda(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.k_from_p_T(pressure, temperature);
-}
+  // The gravity acceleration as a vector
+  const MaterialProperty<RealVectorValue> & _gravity;
+};

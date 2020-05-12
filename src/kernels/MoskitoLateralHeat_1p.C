@@ -21,55 +21,46 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoEOS1P_FPModule.h"
+#include "MoskitoLateralHeat_1p.h"
 
-registerMooseObject("MoskitoApp", MoskitoEOS1P_FPModule);
+registerMooseObject("MoskitoApp", MoskitoLateralHeat_1p);
 
 template <>
 InputParameters
-validParams<MoskitoEOS1P_FPModule>()
+validParams<MoskitoLateralHeat_1p>()
 {
-  InputParameters params = validParams<MoskitoEOS1P>();
-
-  params.addRequiredParam<UserObjectName>("SinglePhase_fp",
-          "The name of the FluidProperties UserObject");
-
+  InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Lateral heat exchange between wellbore "
+        "and formation including tubing (mandatory), insulation, liquid filled "
+        "annulus and cementation");
   return params;
 }
 
-MoskitoEOS1P_FPModule::MoskitoEOS1P_FPModule(const InputParameters & parameters)
-  : MoskitoEOS1P(parameters),
-    _fp_eos(getUserObject<SinglePhaseFluidProperties>("SinglePhase_fp"))
+MoskitoLateralHeat_1p::MoskitoLateralHeat_1p(const InputParameters & parameters)
+  : Kernel(parameters),
+  _rto(getMaterialProperty<Real>("radius_tubbing_outer")),
+  _Uto(getMaterialProperty<Real>("thermal_resistivity_well")),
+  _Twb(getMaterialProperty<Real>("temperature_well_formation_interface")),
+  _diameter_liquid(getMaterialProperty<Real>("well_diameter"))
+  {
+  }
+
+Real
+MoskitoLateralHeat_1p::computeQpResidual()
 {
+  Real r = 0.0;
+  r =  2.0 * PI * _rto[_qp] * _Uto[_qp] * (_u[_qp] - _Twb[_qp]);
+  r /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
+
+  return  r * _test[_i][_qp];
 }
 
 Real
-MoskitoEOS1P_FPModule::h_from_p_T(const Real & pressure, const Real & temperature) const
+MoskitoLateralHeat_1p::computeQpJacobian()
 {
-  return _fp_eos.h_from_p_T(pressure, temperature);
-}
+  Real j = 0.0;
+  j =  2.0 * PI * _rto[_qp] * _Uto[_qp] * _phi[_j][_qp];
+  j /=  PI * _diameter_liquid[_qp] * _diameter_liquid[_qp] / 4.0;
 
-Real
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.rho_from_p_T(pressure, temperature);
-}
-
-void
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature,
-                            Real & rho, Real & drho_dp, Real & drho_dT) const
-{
-  _fp_eos.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-}
-
-Real
-MoskitoEOS1P_FPModule::cp(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.cp_from_p_T(pressure, temperature);
-}
-
-Real
-MoskitoEOS1P_FPModule::lambda(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.k_from_p_T(pressure, temperature);
+  return  j * _test[_i][_qp];
 }

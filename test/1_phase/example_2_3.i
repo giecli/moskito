@@ -26,11 +26,12 @@
 
 [Materials]
   [./area0]
-    type = MoskitoFluidWell1P
+    type = MoskitoFluidWell_1p1c
     pressure = p
-    enthalpy = h
+    temperature = T
     flowrate = q
     well_direction = x
+    well_type = production
     eos_uo = eos
     viscosity_uo = viscosity
     well_diameter = 0.062
@@ -70,11 +71,11 @@
 []
 
 [Variables]
-  [./h]
+  [./T]
     [./InitialCondition]
       type = FunctionIC
-      function = '(273.15+43.3+0.024606*x)*1000'
-      variable = h
+      function = '273.15+43.3+0.024606*x'
+      variable = T
     [../]
   [../]
   [./p]
@@ -87,21 +88,21 @@
 []
 
 [Kernels]
-  [./hkernel]
+  [./Tkernel]
     type = NullKernel
-    variable = h
+    variable = T
   [../]
   [./pkernel]
-    type = MoskitoMass
+    type = MoskitoMass_1p1c
     variable = p
     flowrate = q
-    enthalpy = h
+    temperature = T
   [../]
   [./qkernel]
-    type = MoskitoMomentum
+    type = MoskitoMomentum_1p1c
     variable = q
     pressure = p
-    enthalpy = h
+    temperature = T
   [../]
 []
 

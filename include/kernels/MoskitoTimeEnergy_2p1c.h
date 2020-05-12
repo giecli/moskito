@@ -21,45 +21,40 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOFLUIDWELL1P_H
-#define MOSKITOFLUIDWELL1P_H
+#pragma once
 
-#include "MoskitoFluidWellGeneral.h"
-#include "MoskitoEOS1P.h"
-#include "MoskitoViscosity1P.h"
+#include "TimeKernel.h"
 
-class MoskitoFluidWell1P;
+class MoskitoTimeEnergy_2p1c;
 
 template <>
-InputParameters validParams<MoskitoFluidWell1P>();
+InputParameters validParams<MoskitoTimeEnergy_2p1c>();
 
-class MoskitoFluidWell1P : public MoskitoFluidWellGeneral
+class MoskitoTimeEnergy_2p1c : public TimeKernel
 {
 public:
-  MoskitoFluidWell1P(const InputParameters & parameters);
-  virtual void computeQpProperties() override;
+  MoskitoTimeEnergy_2p1c(const InputParameters & parameters);
 
 protected:
-  // Userobject to equation of state
-  const MoskitoEOS1P & eos_uo;
-  // Userobject to Viscosity Eq
-  const MoskitoViscosity1P & viscosity_uo;
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  // The specific heat at constant pressure
-  MaterialProperty<Real> & _cp;
+  // required values for pressure and flowrate coupling
+  const VariableValue & _q;
+  const VariableValue & _p_dot;
+  const VariableValue & _q_dot;
+  const VariableValue & _dp_dot;
+  const VariableValue & _dq_dot;
+  const unsigned int _p_var_number;
+  const unsigned int _q_var_number;
+
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
   // The density
-  MaterialProperty<Real> & _rho;
+  const MaterialProperty<Real> & _rho;
   // The first derivative of density wrt pressure
-  MaterialProperty<Real> & _drho_dp;
-  // The second derivative of density wrt pressure
-  MaterialProperty<Real> & _drho_dp_2;
-  // The first derivative of density wrt temperature
-  MaterialProperty<Real> & _drho_dT;
+  const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt enthalpy
-  MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt enthalpy
-  MaterialProperty<Real> & _drho_dh_2;
-
+  const MaterialProperty<Real> & _drho_dh;
 };
-
-#endif /* MOSKITOFLUIDWELL1P_H */

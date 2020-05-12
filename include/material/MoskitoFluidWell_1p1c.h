@@ -21,55 +21,40 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoEOS1P_FPModule.h"
+#pragma once
 
-registerMooseObject("MoskitoApp", MoskitoEOS1P_FPModule);
+#include "MoskitoFluidWellGeneral.h"
+#include "MoskitoEOS1P.h"
+#include "MoskitoViscosity1P.h"
+
+class MoskitoFluidWell_1p1c;
 
 template <>
-InputParameters
-validParams<MoskitoEOS1P_FPModule>()
+InputParameters validParams<MoskitoFluidWell_1p1c>();
+
+class MoskitoFluidWell_1p1c : public MoskitoFluidWellGeneral
 {
-  InputParameters params = validParams<MoskitoEOS1P>();
+public:
+  MoskitoFluidWell_1p1c(const InputParameters & parameters);
+  virtual void computeQpProperties() override;
 
-  params.addRequiredParam<UserObjectName>("SinglePhase_fp",
-          "The name of the FluidProperties UserObject");
+protected:
+  // Userobject to equation of state
+  const MoskitoEOS1P & eos_uo;
+  // Userobject to Viscosity Eq
+  const MoskitoViscosity1P & viscosity_uo;
 
-  return params;
-}
+  // The specific heat at constant pressure
+  MaterialProperty<Real> & _cp;
+  // The density
+  MaterialProperty<Real> & _rho;
+  // The first derivative of density wrt pressure
+  MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt temperature
+  MaterialProperty<Real> & _drho_dT;
+  // Enthalpy from P and T
+  MaterialProperty<Real> & _h;
 
-MoskitoEOS1P_FPModule::MoskitoEOS1P_FPModule(const InputParameters & parameters)
-  : MoskitoEOS1P(parameters),
-    _fp_eos(getUserObject<SinglePhaseFluidProperties>("SinglePhase_fp"))
-{
-}
-
-Real
-MoskitoEOS1P_FPModule::h_from_p_T(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.h_from_p_T(pressure, temperature);
-}
-
-Real
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.rho_from_p_T(pressure, temperature);
-}
-
-void
-MoskitoEOS1P_FPModule::rho_from_p_T(const Real & pressure, const Real & temperature,
-                            Real & rho, Real & drho_dp, Real & drho_dT) const
-{
-  _fp_eos.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-}
-
-Real
-MoskitoEOS1P_FPModule::cp(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.cp_from_p_T(pressure, temperature);
-}
-
-Real
-MoskitoEOS1P_FPModule::lambda(const Real & pressure, const Real & temperature) const
-{
-  return _fp_eos.k_from_p_T(pressure, temperature);
-}
+  // The coupled temperature
+  const VariableValue & _T;
+};

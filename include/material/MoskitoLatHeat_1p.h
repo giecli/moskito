@@ -21,29 +21,26 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#ifndef MOSKITOLATHEATITERATIONXIONG_H
-#define MOSKITOLATHEATITERATIONXIONG_H
-
 #pragma once
 
 #include "Material.h"
 #include "Function.h"
 #include "NewtonIteration.h"
 
-class MoskitoLatHeatIterationXiong;
+class MoskitoLatHeat_1p;
 
 template <>
-InputParameters validParams<MoskitoLatHeatIterationXiong>();
+InputParameters validParams<MoskitoLatHeat_1p>();
 
-class MoskitoLatHeatIterationXiong : public Material, public NewtonIteration
+class MoskitoLatHeat_1p : public Material, public NewtonIteration
 {
 public:
-  MoskitoLatHeatIterationXiong(const InputParameters & parameters);
+  MoskitoLatHeat_1p(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
   virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;
   virtual Real computeResidual(const Real trail_value, const Real scalar) override;
-  virtual Real computeDerivative(const Real trailn_value, const Real scalar) override;
+  virtual Real computeDerivative(const Real trail_value, const Real scalar) override;
   virtual Real initialGuess(const Real trail_value) override;
   virtual Real minimumPermissibleValue(const Real trail_value) const override
   {
@@ -55,6 +52,8 @@ public:
   }
 
 protected:
+  // The coupled temperature
+  const VariableValue & _T;
   // Calculate transient time function according to Ramey
   Real transienttimefunction(Real Uto);
   // Calculate deoth dependent formation temperature
@@ -73,8 +72,6 @@ protected:
   Real Grashof(Real Uto, Real Temp, Real grav);
   // Calculate Rayleigh Number needed for hc calculation
   Real Rayleigh(Real grav,Real Uto, Real Temp);
-  // temperature
-  const MaterialProperty<Real> & _T;
   // Radius tubing outer
   MaterialProperty<Real> & _RadTubout;
   // Variable to output formation temperature
@@ -160,5 +157,3 @@ protected:
     {{ 2.39,  2.39,  2.40,  2.42,  2.44,  2.48,  2.51,  2.54,  2.56,  2.57,  2.57,  2.57,  2.58,  2.58}},
     {{ 2.73,  2.73,  2.74,  2.75,  2.77,  2.81,  2.84,  2.86,  2.88,  2.89,  2.89,  2.89,  2.89,  2.90}}}};
 };
-
-#endif

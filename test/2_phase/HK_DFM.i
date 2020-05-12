@@ -31,11 +31,12 @@
 
 [Materials]
   [./area0]
-    type = MoskitoFluidWell2P
+    type = MoskitoFluidWell_2p1c
     pressure = p
     enthalpy = h
     flowrate = q
     well_direction = x
+    well_type = production
     eos_uo = eos
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
@@ -61,7 +62,7 @@
   [./q]
     [./InitialCondition]
       type = FunctionIC
-      variable = h
+      variable = q
       function = 'if(x<100,1e-2*x,(x-99)*2)*3.85e-3'
     [../]
   [../]

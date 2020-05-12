@@ -32,19 +32,20 @@
 
 [Materials]
   [./area]
-    type = MoskitoFluidWell2P
+    type = MoskitoFluidWell_2p1c
     well_diameter = 0.1
     pressure = p
     enthalpy = h
     flowrate = q
     well_direction = x
+    well_type = production
     eos_uo = eos
     viscosity_uo = viscosity_2p
     drift_flux_uo = df
     roughness_type = smooth
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'gas_velocity liquid_velocity void_fraction mass_fraction flow_pattern current_phase gas_density liquid_density density temperature well_velocity'
+    output_properties = 'profile_mixture_density gas_velocity liquid_velocity void_fraction mass_fraction flow_pattern current_phase gas_density liquid_density density temperature well_velocity flow_type_c0 drift_velocity'
   [../]
 []
 
@@ -64,13 +65,6 @@
 []
 
 [Variables]
-  [./h]
-    [./InitialCondition]
-      type = FunctionIC
-      variable = h
-      function = 5e5
-    [../]
-  [../]
   [./p]
     [./InitialCondition]
       type = FunctionIC
@@ -79,23 +73,27 @@
     [../]
   [../]
   [./q]
-    scaling = 1e-6
+    scaling = 1e-3
+  [../]
+[]
+
+[AuxVariables]
+  [./h]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 5e5
   [../]
 []
 
 [Kernels]
-  [./hkernel]
-    type = NullKernel
-    variable = h
-  [../]
   [./pkernel]
-    type = MoskitoMass
+    type = MoskitoMass_2p1c
     variable = p
     flowrate = q
     enthalpy = h
   [../]
   [./qkernel]
-    type = MoskitoMomentum
+    type = MoskitoMomentum_2p1c
     variable = q
     pressure = p
     enthalpy = h
@@ -123,7 +121,7 @@
   l_max_its = 50
   nl_max_its = 50
   l_tol = 1e-8
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-9
   solve_type = NEWTON
 []
 
