@@ -38,6 +38,7 @@ class MoskitoFluidWell_2p1c : public MoskitoFluidWellGeneral
 public:
   MoskitoFluidWell_2p1c(const InputParameters & parameters);
   virtual void computeQpProperties() override;
+  void PhaseVelocities();
   void GammaDerivatives();
   Real gamma(const Real & h, const Real & p, const Real & q);
 
