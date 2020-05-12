@@ -21,66 +21,41 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoTimeMass_2p1c.h"
+#pragma once
 
-registerMooseObject("MoskitoApp", MoskitoTimeMass_2p1c);
+#include "TimeKernel.h"
+
+class MoskitoTimeMomentum_2p1c;
 
 template <>
-InputParameters
-validParams<MoskitoTimeMass_2p1c>()
+InputParameters validParams<MoskitoTimeMomentum_2p1c>();
+
+class MoskitoTimeMomentum_2p1c : public TimeKernel
 {
-  InputParameters params = validParams<TimeKernel>();
+public:
+  MoskitoTimeMomentum_2p1c(const InputParameters & parameters);
 
-  params.addRequiredCoupledVar("enthalpy", "Enthalpy nonlinear variable");
-  params.addClassDescription("Time derivative part of mass conservation equation for "
-                  "2 phase pipe flow and it returns pressure");
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  return params;
-}
+  // required values for enthalpy and pressure coupling
+  const VariableValue & _p_dot;
+  const VariableValue & _h_dot;
+  const VariableValue & _dp_dot;
+  const VariableValue & _dh_dot;
+  const unsigned int _p_var_number;
+  const unsigned int _h_var_number;
 
-MoskitoTimeMass_2p1c::MoskitoTimeMass_2p1c(const InputParameters & parameters)
-  : TimeKernel(parameters),
-    _h_dot(coupledDot("enthalpy")),
-    _dh_dot(coupledDotDu("enthalpy")),
-    _h_var_number(coupled("enthalpy")),
-    _drho_dp(getMaterialProperty<Real>("drho_dp")),
-    _drho_dh(getMaterialProperty<Real>("drho_dh"))
-{
-}
-
-Real
-MoskitoTimeMass_2p1c::computeQpResidual()
-{
-  Real r = 0.0;
-
-  r += _drho_dp[_qp] * _u_dot[_qp];
-  r += _drho_dh[_qp] * _h_dot[_qp];
-  r *= _test[_i][_qp];
-
-  return r;
-}
-
-Real
-MoskitoTimeMass_2p1c::computeQpJacobian()
-{
-  Real j = 0.0;
-
-  j += _drho_dp[_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
-  j *= _test[_i][_qp];
-
-  return j;
-}
-
-Real
-MoskitoTimeMass_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
-{
-  Real j = 0.0;
-
-  if (jvar == _h_var_number)
-  {
-    j += _drho_dh[_qp] * _phi[_j][_qp] * _dh_dot[_qp];
-    j *= _test[_i][_qp];
-  }
-
-  return j;
-}
+  // The sign of well flow direction
+  const MaterialProperty<Real> & _well_sign;
+  // The area of pipe
+  const MaterialProperty<Real> & _area;
+  // The density
+  const MaterialProperty<Real> & _rho;
+  // The first derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh;
+};

@@ -34,7 +34,7 @@ validParams<MoskitoMomentum_2p1c>()
   params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable");
   params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable");
   params.addClassDescription("Momentum conservation equation for 2 phase "
-        "(liquid and gas) pipe flow and it returns volumetric flowrate.");
+        "pipe flow and it returns volumetric flowrate.");
   return params;
 }
 
