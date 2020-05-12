@@ -81,6 +81,8 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
 void
 MoskitoFluidWell_2p1c::computeQpProperties()
 {
+  MoskitoFluidWellGeneral::computeQpProperties();
+
   // calculate required properties based on the given EOS
   eos_uo.VMFrac_T_from_p_h(_P[_qp], _h[_qp], _vmfrac[_qp], _T[_qp], _phase[_qp]);
   eos_uo.rho_m_by_p(_P[_qp], _h[_qp], _rho_m[_qp], _drho_m_dp[_qp], _drho_m_dp_2[_qp]);
@@ -90,37 +92,18 @@ MoskitoFluidWell_2p1c::computeQpProperties()
   _vfrac[_qp]  = (_rho_m[_qp] - _rho_l[_qp]) / (_rho_g[_qp] - _rho_l[_qp]);
   _cp_m[_qp]  = eos_uo.cp_m_from_p_T(_P[_qp], _T[_qp], _vmfrac[_qp], _phase[_qp]);
 
-  _dia[_qp] = _d;
-  if (!(_area_defined*_perimeter_defined))
-  {
-    _area[_qp] = PI * _dia[_qp] * _dia[_qp] / 4.0;
-    _perimeter[_qp] = PI * _dia[_qp];
-  }
-  else
-  {
-    _area[_qp] = _u_area;
-    _perimeter[_qp] = _u_perimeter;
-  }
-
   _u[_qp] = _flow[_qp] / _area[_qp];
   _Re[_qp] = _rho_m[_qp] * _dia[_qp] * _u[_qp] / viscosity_uo.mixture_mu(_P[_qp], _T[_qp], _vmfrac[_qp]);
-
-  MoskitoFluidWellGeneral::computeQpProperties();
+  if (_f_defined)
+    _friction[_qp] = _u_f;
+  else
+    MoodyFrictionFactor(_friction[_qp], _rel_roughness, _Re[_qp], _roughness_type);
 
   // drift-flux calculator section
-  if (_phase[_qp] == 2.0)
-  {
     MoskitoDFGVar DFinp(_u[_qp], _rho_g[_qp], _rho_l[_qp], _vmfrac[_qp],
       _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
     dfm_uo.DFMCalculator(DFinp);
-      DFinp.DFMOutput(_flow_pat[_qp], _c0[_qp], _u_d[_qp]);
-  }
-  else
-  {
-    _flow_pat[_qp] = 0;
-    _c0[_qp] = 1.0;
-    _u_d[_qp] = 0.0;
-  }
+    DFinp.DFMOutput(_flow_pat[_qp], _c0[_qp], _u_d[_qp]);
 
   _rho_pam[_qp] = _rho_g[_qp] * _c0[_qp]  * _vfrac[_qp] + (1.0 - _vfrac[_qp] * _c0[_qp]) * _rho_l[_qp];
 
@@ -147,17 +130,7 @@ MoskitoFluidWell_2p1c::computeQpProperties()
     }
   }
 
-  if (_phase[_qp] == 2.0)
-    GammaDerivatives();
-  else
-  {
-    _dgamma_dh[_qp] = 0.0;
-    _dgamma_dp[_qp] = 0.0;
-    _dgamma_dq[_qp] = 0.0;
-    _dgamma2_dhq[_qp] = 0.0;
-    _dgamma2_dpq[_qp] = 0.0;
-    _dgamma2_dq2[_qp] = 0.0;
-  }
+  GammaDerivatives();
 
   // _lambda[_qp]  = (1.0 - (_d * _d) / std::pow(_d + _thickness , 2.0)) * _lambda0;
   // _lambda[_qp] += (_d * _d) / std::pow(_d + _thickness , 2.0) * eos_uo._lambda;
@@ -185,60 +158,52 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
 void
 MoskitoFluidWell_2p1c::GammaDerivatives()
 {
-  Real dh, dq, dp;
-  Real tol = 1.0e-5;
-  dh = tol * _h[_qp];
-  dp = tol * _P[_qp];
-  dq = tol * _flow[_qp];
+  _dgamma_dh[_qp] = 0.0; _dgamma_dp[_qp] = 0.0; _dgamma_dq[_qp] = 0.0;
+  _dgamma2_dhq[_qp] = 0.0; _dgamma2_dpq[_qp] = 0.0; _dgamma2_dq2[_qp] = 0.0;
 
-  if (dh != 0.0)
+  if (_phase[_qp] == 2.0)
   {
-    _dgamma_dh[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp]) - gamma(_h[_qp] - dh, _P[_qp], _flow[_qp]);
-    _dgamma_dh[_qp] /= 2.0 * dh;
-  }
-  else
-    _dgamma_dh[_qp] = 0.0;
+    Real dh, dq, dp;
+    Real tol = 1.0e-5;
+    dh = tol * _h[_qp]; dp = tol * _P[_qp]; dq = tol * _flow[_qp];
 
-  if (dp != 0.0)
-  {
-  _dgamma_dp[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp]) - gamma(_h[_qp], _P[_qp] - dp, _flow[_qp]);
-  _dgamma_dp[_qp] /= 2.0 * dp;
-  }
-  else
-    _dgamma_dp[_qp] = 0.0;
+    if (dh != 0.0)
+    {
+      _dgamma_dh[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp]) - gamma(_h[_qp] - dh, _P[_qp], _flow[_qp]);
+      _dgamma_dh[_qp] /= 2.0 * dh;
+    }
 
-  if (dq != 0.0)
-  {
-  _dgamma_dq[_qp]  = gamma(_h[_qp], _P[_qp], _flow[_qp] + dq) - gamma(_h[_qp], _P[_qp], _flow[_qp] - dq);
-  _dgamma_dq[_qp] /= 2.0 * dq;
-  }
-  else
-    _dgamma_dq[_qp] = 0.0;
+    if (dp != 0.0)
+    {
+    _dgamma_dp[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp]) - gamma(_h[_qp], _P[_qp] - dp, _flow[_qp]);
+    _dgamma_dp[_qp] /= 2.0 * dp;
+    }
 
-  if (dh * dq != 0.0)
-  {
-  _dgamma2_dhq[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] - dq);
-  _dgamma2_dhq[_qp] -= gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] - dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] + dq);
-  _dgamma2_dhq[_qp] /= 4.0 * dh * dq;
-  }
-  else
-    _dgamma2_dhq[_qp] = 0.0;
+    if (dq != 0.0)
+    {
+    _dgamma_dq[_qp]  = gamma(_h[_qp], _P[_qp], _flow[_qp] + dq) - gamma(_h[_qp], _P[_qp], _flow[_qp] - dq);
+    _dgamma_dq[_qp] /= 2.0 * dq;
+    }
 
-  if (dp * dq != 0.0)
-  {
-  _dgamma2_dpq[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] - dq);
-  _dgamma2_dpq[_qp] -= gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] - dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] + dq);
-  _dgamma2_dpq[_qp] /= 4.0 * dp * dq;
-  }
-  else
-    _dgamma2_dpq[_qp] = 0.0;
+    if (dh * dq != 0.0)
+    {
+    _dgamma2_dhq[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] - dq);
+    _dgamma2_dhq[_qp] -= gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] - dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] + dq);
+    _dgamma2_dhq[_qp] /= 4.0 * dh * dq;
+    }
 
-  if (dq != 0.0)
-  {
-  _dgamma2_dq2[_qp]  = gamma(_h[_qp], _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp], _flow[_qp] - dq);
-  _dgamma2_dq2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _flow[_qp]);
-  _dgamma2_dq2[_qp] /=  dq * dq;
+    if (dp * dq != 0.0)
+    {
+    _dgamma2_dpq[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] - dq);
+    _dgamma2_dpq[_qp] -= gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] - dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] + dq);
+    _dgamma2_dpq[_qp] /= 4.0 * dp * dq;
+    }
+
+    if (dq != 0.0)
+    {
+    _dgamma2_dq2[_qp]  = gamma(_h[_qp], _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp], _flow[_qp] - dq);
+    _dgamma2_dq2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _flow[_qp]);
+    _dgamma2_dq2[_qp] /=  dq * dq;
+    }
   }
-  else
-    _dgamma2_dq2[_qp] = 0.0;
 }

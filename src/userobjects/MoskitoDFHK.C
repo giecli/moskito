@@ -45,36 +45,47 @@ MoskitoDFHK::MoskitoDFHK(const InputParameters & parameters)
 void
 MoskitoDFHK::DFMCalculator(MoskitoDFGVar & input) const
 {
-  // conversion SI --> American petroleum units
-  input._rho_g *= kg_to_lbm / m3_to_ft3;
-  input._rho_l *= kg_to_lbm / m3_to_ft3;
-  input._grav *= m_to_ft;
-  input._dia *= m_to_ft;
-  input._v_m *= m_to_ft;
-
   // Added by Maziar
-  // To match new sign for flow direction
-  input._dir *= -1.0;
+  // To avoid calculation for 1 phase flow and return correct value for DF method
+  if (input._mfrac > 0.0 && input._mfrac < 1.0)
+  {
+    // conversion SI --> American petroleum units
+    input._rho_g *= kg_to_lbm / m3_to_ft3;
+    input._rho_l *= kg_to_lbm / m3_to_ft3;
+    input._grav *= m_to_ft;
+    input._dia *= m_to_ft;
+    input._v_m *= m_to_ft;
 
-  MoskitoHKLVar tmp;
+    // Added by Maziar
+    // To match new sign for flow direction
+    input._dir *= -1.0;
 
-  //check constraints of Hasan Kabir approach
-  if (input._angle > 0.25 * PI)
-    mooseError(name(), ": Angle > 45°, violating Hasan & Kabir limitations");
+    MoskitoHKLVar tmp;
 
-  HKinitialisation(input, tmp);
-  HKcalculator(input, tmp);
-  // HKvfrac(input, tmp);
+    //check constraints of Hasan Kabir approach
+    if (input._angle > 0.25 * PI)
+      mooseError(name(), ": Angle > 45°, violating Hasan & Kabir limitations");
 
-  // conversion back to SI
-  input._vd /= m_to_ft;
+    HKinitialisation(input, tmp);
+    HKcalculator(input, tmp);
+    // HKvfrac(input, tmp);
 
-  // Added by Maziar
-  // Normalised c0 by max c0 in HK model to match Shi
-  input._C0 /= 1.2;
-  // correction for ud sign for injection and production
-  if (input._dir == -1.0)
-    input._vd *= -1.0;
+    // conversion back to SI
+    input._vd /= m_to_ft;
+
+    // Added by Maziar
+    // Normalised c0 by max c0 in HK model to match Shi
+    input._C0 /= 1.2;
+    // correction for ud sign for injection and production
+    if (input._dir == -1.0)
+      input._vd *= -1.0;
+  }
+  else
+  {
+    input._vd = 0.0;
+    input._C0 = 1.0;
+    input._FlowPat = 0.0;
+  }
 }
 
 void
