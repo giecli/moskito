@@ -57,4 +57,18 @@ protected:
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
+
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dh;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dp;
+  // The gamma first derivatives
+  const MaterialProperty<Real> & _dgamma_dq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dhq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dpq;
+  // The gamma second derivatives
+  const MaterialProperty<Real> & _dgamma2_dq2;
+
 };
