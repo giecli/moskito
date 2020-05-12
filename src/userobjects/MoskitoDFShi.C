@@ -64,13 +64,21 @@ void
 MoskitoDFShi::DFMCalculator(MoskitoDFGVar & input) const
 {
   MoskitoShiLVar tmp;
+  if (input._mfrac > 0.0 && input._mfrac < 1.0)
+  {
+      //check constraints of Shi approach limiting the approach to a deviation of 70° from vertical
+      if (input._angle > 0.3888 * PI)
+        mooseError(name(), ": Angle > 70°, violating Shi limitations");
 
-  //check constraints of Shi approach limiting the approach to a deviation of 70° from vertical
-  if (input._angle > 0.3888 * PI)
-    mooseError(name(), ": Angle > 70°, violating Shi limitations");
-
-  Shiinitialisation(input, tmp);
-  Shicalculator(input, tmp);
+    Shiinitialisation(input, tmp);
+    Shicalculator(input, tmp);
+  }
+  else
+  {
+    input._vd = 0.0;
+    input._C0 = 1.0;
+    input._FlowPat = 0.0;
+  }
 }
 
 void
