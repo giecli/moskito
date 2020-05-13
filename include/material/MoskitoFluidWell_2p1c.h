@@ -40,7 +40,11 @@ public:
   virtual void computeQpProperties() override;
   void PhaseVelocities();
   void GammaDerivatives();
+  void KappaDerivatives();
+  void OmegaDerivatives();
   Real gamma(const Real & h, const Real & p, const Real & q);
+  Real kappa(const Real & h, const Real & p, const Real & q);
+  Real omega(const Real & h, const Real & p, const Real & q);
 
 protected:
   // Userobject to equation of state
@@ -103,6 +107,20 @@ protected:
   MaterialProperty<Real> & _dgamma2_dpq;
   // The gamma second derivatives
   MaterialProperty<Real> & _dgamma2_dq2;
+
+  // The kappa first derivatives
+  MaterialProperty<Real> & _dkappa_dh;
+  // The kappa first derivatives
+  MaterialProperty<Real> & _dkappa_dp;
+  // The kappa first derivatives
+  MaterialProperty<Real> & _dkappa_dq;
+
+  // The omega first derivatives
+  MaterialProperty<Real> & _domega_dh;
+  // The omega first derivatives
+  MaterialProperty<Real> & _domega_dp;
+  // The omega first derivatives
+  MaterialProperty<Real> & _domega_dq;
 
   // The coupled enthalpy
   const VariableValue & _h;

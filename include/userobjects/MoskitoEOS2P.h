@@ -67,9 +67,9 @@ public:
 
   virtual Real rho_m_from_p_h(const Real & pressure, const Real & enthalpy) const = 0;
 
-protected:
-  virtual void h_lat(const Real & pressure, Real & hlat, Real & hsatl) const = 0;
+  virtual void h_lat(const Real & pressure, Real & hlat, Real & hsatl, Real & hsatg) const = 0;
 
+protected:
   const Real _tol;
 };
 
