@@ -70,5 +70,4 @@ protected:
   const MaterialProperty<Real> & _dgamma2_dpq;
   // The gamma second derivatives
   const MaterialProperty<Real> & _dgamma2_dq2;
-
 };
