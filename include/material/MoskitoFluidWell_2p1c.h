@@ -91,9 +91,6 @@ protected:
   MaterialProperty<Real> & _c0;
   // flow pattern
   MaterialProperty<Real> & _flow_pat;
-  // superficial velocities calculated by HK
-  MaterialProperty<Real> &_v_sg;
-  MaterialProperty<Real> &_v_sl;
 
   // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dh;

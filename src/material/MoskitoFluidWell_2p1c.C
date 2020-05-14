@@ -63,8 +63,6 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
     _u_d(declareProperty<Real>("drift_velocity")),
     _c0(declareProperty<Real>("flow_type_c0")),
     _flow_pat(declareProperty<Real>("flow_pattern")),
-    _v_sg(declareProperty<Real>("superficial_gas_velocity")),
-    _v_sl(declareProperty<Real>("superficial_liquid_velocity")),
     _dgamma_dh(declareProperty<Real>("dgamma_dh")),
     _dgamma_dp(declareProperty<Real>("dgamma_dp")),
     _dgamma_dq(declareProperty<Real>("dgamma_dq")),
@@ -116,6 +114,8 @@ MoskitoFluidWell_2p1c::computeQpProperties()
 
   PhaseVelocities();
   GammaDerivatives();
+  KappaDerivatives();
+  OmegaDerivatives();
 
   // _lambda[_qp]  = (1.0 - (_d * _d) / std::pow(_d + _thickness , 2.0)) * _lambda0;
   // _lambda[_qp] += (_d * _d) / std::pow(_d + _thickness , 2.0) * eos_uo._lambda;
@@ -150,18 +150,24 @@ MoskitoFluidWell_2p1c::PhaseVelocities()
 Real
 MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
 {
-  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, rho_pam;
+  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, rho_pam, dummy, c0, u_d;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
   rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
   rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
   rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
   vfrac = (rho_m - rho_l) / (rho_g - rho_l);
-  rho_pam = rho_g * _c0[_qp]  * vfrac + (1.0 - vfrac * _c0[_qp]) * rho_l;
+
+  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac,
+      _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
+  dfm_uo.DFMCalculator(DFinp);
+  DFinp.DFMOutput(dummy, c0, u_d);
+
+  rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
 
   Real gamma = 0.0;
   gamma  = vfrac / (1.0 - vfrac);
-  gamma *=  rho_g * rho_l * rho_m / (rho_pam * rho_pam);
-  gamma *= std::pow((_c0[_qp] - 1.0) * q / _area[_qp] + _u_d[_qp] , 2.0);
+  gamma *= rho_g * rho_l * rho_m / (rho_pam * rho_pam);
+  gamma *= std::pow((c0 - 1.0) * q / _area[_qp] + u_d , 2.0);
 
   return gamma;
 }
@@ -169,18 +175,24 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
 Real
 MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & q)
 {
-  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, rho_pam, h_g, h_l, dummy;
+  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, rho_pam, h_g, h_l, dummy, c0, u_d;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
   rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
   rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
   rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
   vfrac = (rho_m - rho_l) / (rho_g - rho_l);
-  rho_pam = rho_g * _c0[_qp]  * vfrac + (1.0 - vfrac * _c0[_qp]) * rho_l;
+
+  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac,
+      _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
+  dfm_uo.DFMCalculator(DFinp);
+  DFinp.DFMOutput(dummy, c0, u_d);
+
+  rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
   eos_uo.h_lat(p, dummy, h_l, h_g);
 
   Real kappa = 0.0;
   kappa  = vfrac * rho_g * rho_l / rho_pam * (h_g - h_l);
-  kappa *= std::pow((_c0[_qp] - 1.0) * q / _area[_qp] + _u_d[_qp] , 2.0);
+  kappa *= std::pow((c0 - 1.0) * q / _area[_qp] + u_d , 2.0);
 
   return kappa;
 }
@@ -188,16 +200,22 @@ MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & q)
 Real
 MoskitoFluidWell_2p1c::omega(const Real & h, const Real & p, const Real & q)
 {
-  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, u_g, u_l, rho_pam;
+  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, u_g, u_l, rho_pam, dummy, c0, u_d;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
   rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
   rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
   rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
   vfrac = (rho_m - rho_l) / (rho_g - rho_l);
-  rho_pam = rho_g * _c0[_qp]  * vfrac + (1.0 - vfrac * _c0[_qp]) * rho_l;
 
-  u_g  = (_c0[_qp] * rho_m * q / _area[_qp] + rho_l * _u_d[_qp]) / rho_pam;
-  u_l  = (1.0 - vfrac * _c0[_qp]) * rho_m * q / _area[_qp] - rho_g * vfrac * _u_d[_qp];
+  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac,
+      _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
+  dfm_uo.DFMCalculator(DFinp);
+  DFinp.DFMOutput(dummy, c0, u_d);
+
+  rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
+
+  u_g  = (c0 * rho_m * q / _area[_qp] + rho_l * u_d) / rho_pam;
+  u_l  = (1.0 - vfrac * c0) * rho_m * q / _area[_qp] - rho_g * vfrac * u_d;
   u_l /= (1.0 - vfrac) * rho_pam;
 
   Real omega = 0.0;
