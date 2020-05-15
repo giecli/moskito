@@ -41,10 +41,10 @@ validParams<MoskitoDFShi>()
     params.addParam<Real>("Shi_param_Fv",1.0,
           "Fitting parameter to increase C0's Sensitivty towards gas-water fractions ; dimesionless ");
     params.addParam<Real>("Pan_param_cMax",1.2,
-          "Fitting parameter for transition curve; dimesionless; 1.0 < cMax < 1.5; 1.2 is the cefault value in ECLIPSE; the larger values (=>1.2 match smaller diameter borehole, for larger diameters cMax should approach 1.0 ");
-    params.addRequiredParam<std::vector<Real>>("inclination_vector",
-          "Parameterization of Shi inclination function; 1.27 < m0 < 1.85;"
-           "0.21 < n1 0.24; 0.95 < n2 1.08");
+          "Fitting parameter for transition curve called A in Shi et al. 2005; dimesionless; 1.0 < cMax < 1.5; 1.2 is the cefault value in ECLIPSE; the larger values (=>1.2 match smaller diameter borehole, for larger diameters cMax should approach 1.0 ");
+    // params.addRequiredParam<std::vector<Real>>("inclination_vector",
+    //       "Parameterization of Shi inclination function; 1.27 < m0 < 1.85;"
+    //        "0.21 < n1 0.24; 0.95 < n2 1.08");
     return params;
 }
 
@@ -55,8 +55,8 @@ MoskitoDFShi::MoskitoDFShi(const InputParameters & parameters)
     _tran_param_a1(getParam<Real>("Shi_param_a1")),
     _tran_param_a2(getParam<Real>("Shi_param_a2")),
     _C0_Fv(getParam<Real>("Shi_param_Fv")),
-    _C0_cMax(getParam<Real>("Pan_param_cMax")),
-    _Shi_incl_triple(getParam<std::vector<Real>>("inclination_vector"))
+    _C0_cMax(getParam<Real>("Pan_param_cMax"))
+    // _Shi_incl_triple(getParam<std::vector<Real>>("inclination_vector"))
     {
     }
 
@@ -72,6 +72,10 @@ MoskitoDFShi::DFMCalculator(MoskitoDFGVar & input) const
 
     Shiinitialisation(input, tmp);
     Shicalculator(input, tmp);
+
+    // correction for ud sign for injection and production
+    if (input._dir == 1.0)
+      input._vd *= -1.0;
   }
   else
   {
@@ -95,7 +99,7 @@ MoskitoDFShi::cal_Kutateladze(MoskitoDFGVar & input, MoskitoShiLVar & LVar) cons
   LVar.Bond = input._dia * input._dia;
   LVar.Bond *= (input._grav * (input._rho_l - input._rho_g)/_surf_ten);
 
-   //Kutateladze number is needed as a parameter to compute v_sgf and k_fct
+   //Kutateladze number is needed as a parameter to compute v_sgf and k_fct, Used formula by Pan et al 2011
   LVar.Kutateladze = std::pow(_cKu / std::pow(LVar.Bond,0.5) * (std::pow(1.0 + LVar.Bond / (_cKu * _cKu * _cw) ,0.5) - 1.0),0.5);
 }
 
@@ -113,20 +117,50 @@ MoskitoDFShi::Shicalculator(MoskitoDFGVar & input, MoskitoShiLVar & LVar) const
 {
 	//C0 is the parameter quantifying the cross section (liquid-gas mixture) of the well; used in _vd and in well2pMaterial
   input._C0 = _C0_cMax / (1.0 + (_C0_cMax - 1.0) * cal_auxvar_nu(input, LVar) * cal_auxvar_nu(input, LVar));
+  Real Test = cal_auxvar_nu(input, LVar);
+  std::cout<<" vsgf = "<< LVar.v_sgf  <<std::endl;
+
+  std::cout<<" v_c = "<< LVar.v_c <<std::endl;
+  std::cout<<" Ku = "<< LVar.Kutateladze <<std::endl;
+  std::cout<<" rho_g = "<< input._rho_g <<std::endl;
+  std::cout<<" rho_l = "<< input._rho_l <<std::endl;
+  std::cout<<" vfrac = "<< input._vfrac <<std::endl;
+  std::cout<<" vm = "<< input._v_m <<std::endl;
+  std::cout<<" nü = "<< Test <<std::endl;
+  std::cout<<" C0 = "<< input._C0 <<std::endl;
+
 
   input._vd = (1.0 - input._C0 * input._vfrac) * LVar.v_c * cal_transition_fct(input,LVar);
   input._vd /= input._C0 * input._vfrac * std::pow(input._rho_g / input._rho_l ,0.5) + 1.0 - input._vfrac * input._C0;
-  input._vd *= _Shi_incl_triple[0] * std::pow(std::cos(input._angle), _Shi_incl_triple[1]) * std::pow(1.0 + std::sin(input._angle),_Shi_incl_triple[2]);
+  // inclinaciton correction after HK and Shi
+  input._vd *= std::pow(std::cos(input._angle),0.5) * std::pow(1.0 + std::sin(input._angle),1.2);
+  // Pan used correction for inclination different from HK and Shi (see next line). If activatd inclination vector has to be activated also
+  // input._vd *= _Shi_incl_triple[0] * std::pow(std::cos(input._angle), _Shi_incl_triple[1]) * std::pow(1.0 + std::sin(input._angle),_Shi_incl_triple[2]);
+  std::cout<<" vd = "<< input._vd <<std::endl;
+  std::cout<<std::endl;
 }
 
 Real
 MoskitoDFShi::cal_auxvar_nu(MoskitoDFGVar & input, MoskitoShiLVar & LVar) const
 {
-	//C0-parameter; for convergence should be B<(2-C0_cMax)/C0_cMax (Shi et al)
+	//C0-parameter; for convergence should be B<(2-C0_cMax)/C0_cMax (Shi et al), here appraoch used after Pan et al 2011
   Real C0_B = 2.0 / _C0_cMax - 1.0667;
+
 	//C0-parameter; 0<C0_beta<1
-  Real C0_beta = std::max(input._vfrac, _C0_Fv * input._vfrac * input._v_m / LVar.v_sgf);
-  return (C0_beta - C0_B) / (1.0 - C0_B);
+  // Shi et al used the following expression
+  // Real C0_beta = std::max(input._vfrac, _C0_Fv * input._vfrac * input._v_m / LVar.v_sgf);
+  // which is not used but simplified as Shis formual leads to discontinuous curve for u_d
+  Real C0_beta = input._vfrac ;
+
+  std::cout<<" beta = "<< C0_beta <<std::endl;
+  Real nu = (C0_beta - C0_B) / (1.0 - C0_B);
+  if (nu < 0)
+    nu = 0;
+  //if beta is < 1, which is the case in the simplified way, we don#t need to constrain nu
+  // if (nu > 1.0)
+  //   nu = 1.0;
+
+  return nu;
 }
 
 Real
@@ -142,11 +176,14 @@ MoskitoDFShi::cal_transition_fct(MoskitoDFGVar & input, MoskitoShiLVar & LVar) c
     {
       K_fct = input._C0 * LVar.Kutateladze - 1.53;
       K_fct /= 2.0;
-      K_fct *= 1.0 - std::cos(PI * (input._vfrac - _tran_param_a1) / (_tran_param_a2 -_tran_param_a1));
+      K_fct *= (1.0 - std::cos(PI * (input._vfrac - _tran_param_a1) / (_tran_param_a2 -_tran_param_a1)));
       K_fct += 1.53;
     }
     else
       K_fct = input._C0 * LVar.Kutateladze;
+
   }
+  std::cout<<" a2 = "<<_tran_param_a2 <<std::endl;
+  std::cout<<" K = "<< K_fct <<std::endl;
   return K_fct;
 }

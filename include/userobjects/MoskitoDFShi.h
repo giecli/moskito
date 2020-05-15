@@ -72,7 +72,7 @@ private:
   // _C0_cMax is a C0 fitting parameter; should be 1.0 < _C0_cMax < 1.5; apprtoaching 1.0 for larger well diameters; in ECLIPSE it is set to 1.2
   Real _C0_cMax;
   // parameterization vector (m0,n1,n2) to fit the inclination function; 1.27<m0<1.85, 0.21<n1<0.24, 0.95<n2<1.08
-  std::vector<Real> _Shi_incl_triple;
+  // std::vector<Real> _Shi_incl_triple
 };
 
 class MoskitoShiLVar
