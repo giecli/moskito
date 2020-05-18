@@ -51,7 +51,10 @@ MoskitoMass_2p1c::MoskitoMass_2p1c(const InputParameters & parameters)
   _well_sign(getMaterialProperty<Real>("flow_direction_sign")),
   _rho(getMaterialProperty<Real>("density")),
   _drho_dp(getMaterialProperty<Real>("drho_dp")),
-  _drho_dh(getMaterialProperty<Real>("drho_dh"))
+  _drho_dh(getMaterialProperty<Real>("drho_dh")),
+  _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
+  _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
+  _drho_dph(getMaterialProperty<Real>("drho_dph"))
 {
 }
 
@@ -74,7 +77,10 @@ MoskitoMass_2p1c::computeQpJacobian()
 {
   RealVectorValue j = 0.0;
 
-  j += _drho_dp[_qp] * _grad_phi[_j][_qp] * _q[_qp];
+  j += _drho_dp_2[_qp] * _phi[_j][_qp] * _grad_u[_qp];
+  j += _drho_dp[_qp] * _grad_phi[_j][_qp];
+  j += _drho_dph[_qp] * _phi[_j][_qp] * _grad_h[_qp];
+  j *= _q[_qp];
   j += _drho_dp[_qp] * _phi[_j][_qp] * _grad_q[_qp];
   j *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
 
@@ -96,7 +102,10 @@ MoskitoMass_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (jvar == _h_var_number)
   {
-    j += _drho_dh[_qp] * _grad_phi[_j][_qp] * _q[_qp];
+    j += _drho_dph[_qp] * _phi[_j][_qp] * _grad_u[_qp];
+    j += _drho_dh_2[_qp] * _phi[_j][_qp] * _grad_h[_qp];
+    j += _drho_dh[_qp] * _grad_phi[_j][_qp];
+    j *= _q[_qp];
     j += _drho_dh[_qp] * _phi[_j][_qp] * _grad_q[_qp];
     j *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
   }

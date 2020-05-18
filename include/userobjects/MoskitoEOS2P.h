@@ -62,6 +62,9 @@ public:
   virtual void rho_m_by_h(
       const Real & pressure, const Real & enthalpy, Real & rho, Real & drho_dh, Real & drho_dh_2) const;
 
+  virtual void rho_m_by_ph(
+      const Real & pressure, const Real & enthalpy, Real & drho_dph) const;
+
   // virtual void rho_m_by_T(
   //     const Real & pressure, const Real & enthalpy, Real & rho, Real & drho_dT, Real & drho_dT_2) const = 0;
 

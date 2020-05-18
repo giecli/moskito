@@ -47,6 +47,9 @@ MoskitoMomentum_2p1c::MoskitoMomentum_2p1c(const InputParameters & parameters)
     _rho(getMaterialProperty<Real>("density")),
     _drho_dp(getMaterialProperty<Real>("drho_dp")),
     _drho_dh(getMaterialProperty<Real>("drho_dh")),
+    _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
+    _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
+    _drho_dph(getMaterialProperty<Real>("drho_dph")),
     _f(getMaterialProperty<Real>("well_moody_friction")),
     _gravity(getMaterialProperty<RealVectorValue>("gravity")),
     _area(getMaterialProperty<Real>("well_area")),
@@ -113,7 +116,9 @@ MoskitoMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (jvar == _p_var_number)
   {
+    j += _drho_dp_2[_qp] * _phi[_j][_qp] * _grad_p[_qp];
     j += _drho_dp[_qp] * _grad_phi[_j][_qp];
+    j += _drho_dph[_qp] * _phi[_j][_qp] * _grad_h[_qp];
     j *= _u[_qp] * _u[_qp];
     j += 2.0 * _drho_dp[_qp] * _phi[_j][_qp] * _u[_qp] * _grad_u[_qp];
     j += _well_sign[_qp] * _f[_qp] * _drho_dp[_qp] * _phi[_j][_qp] * _u[_qp]
@@ -128,7 +133,9 @@ MoskitoMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (jvar == _h_var_number)
   {
+    j += _drho_dh_2[_qp] * _phi[_j][_qp] * _grad_h[_qp];
     j += _drho_dh[_qp] * _grad_phi[_j][_qp];
+    j += _drho_dph[_qp] * _phi[_j][_qp] * _grad_p[_qp];
     j *= _u[_qp] * _u[_qp];
     j += 2.0 * _drho_dh[_qp] * _phi[_j][_qp] * _u[_qp] * _grad_u[_qp];
     j += _well_sign[_qp] * _f[_qp] * _drho_dh[_qp] * _phi[_j][_qp] * _u[_qp]
