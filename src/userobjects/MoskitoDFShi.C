@@ -118,17 +118,6 @@ MoskitoDFShi::Shicalculator(MoskitoDFGVar & input, MoskitoShiLVar & LVar) const
 	//C0 is the parameter quantifying the cross section (liquid-gas mixture) of the well; used in _vd and in well2pMaterial
   input._C0 = _C0_cMax / (1.0 + (_C0_cMax - 1.0) * cal_auxvar_nu(input, LVar) * cal_auxvar_nu(input, LVar));
   Real Test = cal_auxvar_nu(input, LVar);
-  std::cout<<" vsgf = "<< LVar.v_sgf  <<std::endl;
-
-  std::cout<<" v_c = "<< LVar.v_c <<std::endl;
-  std::cout<<" Ku = "<< LVar.Kutateladze <<std::endl;
-  std::cout<<" rho_g = "<< input._rho_g <<std::endl;
-  std::cout<<" rho_l = "<< input._rho_l <<std::endl;
-  std::cout<<" vfrac = "<< input._vfrac <<std::endl;
-  std::cout<<" vm = "<< input._v_m <<std::endl;
-  std::cout<<" nü = "<< Test <<std::endl;
-  std::cout<<" C0 = "<< input._C0 <<std::endl;
-
 
   input._vd = (1.0 - input._C0 * input._vfrac) * LVar.v_c * cal_transition_fct(input,LVar);
   input._vd /= input._C0 * input._vfrac * std::pow(input._rho_g / input._rho_l ,0.5) + 1.0 - input._vfrac * input._C0;
@@ -136,8 +125,6 @@ MoskitoDFShi::Shicalculator(MoskitoDFGVar & input, MoskitoShiLVar & LVar) const
   input._vd *= std::pow(std::cos(input._angle),0.5) * std::pow(1.0 + std::sin(input._angle),1.2);
   // Pan used correction for inclination different from HK and Shi (see next line). If activatd inclination vector has to be activated also
   // input._vd *= _Shi_incl_triple[0] * std::pow(std::cos(input._angle), _Shi_incl_triple[1]) * std::pow(1.0 + std::sin(input._angle),_Shi_incl_triple[2]);
-  std::cout<<" vd = "<< input._vd <<std::endl;
-  std::cout<<std::endl;
 }
 
 Real
@@ -152,7 +139,6 @@ MoskitoDFShi::cal_auxvar_nu(MoskitoDFGVar & input, MoskitoShiLVar & LVar) const
   // which is not used but simplified as Shis formual leads to discontinuous curve for u_d
   Real C0_beta = input._vfrac ;
 
-  std::cout<<" beta = "<< C0_beta <<std::endl;
   Real nu = (C0_beta - C0_B) / (1.0 - C0_B);
   if (nu < 0)
     nu = 0;
@@ -183,7 +169,5 @@ MoskitoDFShi::cal_transition_fct(MoskitoDFGVar & input, MoskitoShiLVar & LVar) c
       K_fct = input._C0 * LVar.Kutateladze;
 
   }
-  std::cout<<" a2 = "<<_tran_param_a2 <<std::endl;
-  std::cout<<" K = "<< K_fct <<std::endl;
   return K_fct;
 }
