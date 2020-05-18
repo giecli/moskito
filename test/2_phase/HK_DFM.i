@@ -43,7 +43,7 @@
     well_diameter = 0.1
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'well_velocity gas_velocity liquid_velocity void_fraction flow_pattern current_phase mass_fraction'
+    output_properties = 'well_velocity gas_velocity liquid_velocity void_fraction flow_type_c0 drift_velocity flow_pattern current_phase mass_fraction'
   [../]
 []
 
