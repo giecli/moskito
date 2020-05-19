@@ -54,7 +54,7 @@
     type = DirichletBC
     variable = p
     boundary = left
-    value = 100000
+    value = 1e5
   [../]
   [./qbc]
     type = DirichletBC
@@ -68,12 +68,10 @@
   [./p]
     [./InitialCondition]
       type = FunctionIC
-      variable = p
       function = '90000+400*x'
     [../]
   [../]
   [./q]
-    scaling = 1e-3
   [../]
 []
 
@@ -116,13 +114,28 @@
   [../]
 []
 
+[Dampers]
+  # [./test]
+  #   type = MaxIncrement
+  #   variable = p
+  #   max_increment = 0.1
+  #   increment_type = fractional
+  # [../]
+  # [./test]
+  #   type = BoundingValueNodalDamper
+  #   variable = p
+  #   min_value = 1e4
+  # [../]
+[]
+
 [Executioner]
   type = Steady
   l_max_its = 50
   nl_max_its = 50
   l_tol = 1e-8
-  nl_rel_tol = 1e-9
+  nl_rel_tol = 1e-8
   solve_type = NEWTON
+  automatic_scaling = true
 []
 
 [Outputs]

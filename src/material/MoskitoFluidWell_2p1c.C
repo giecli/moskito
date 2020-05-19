@@ -98,7 +98,6 @@ MoskitoFluidWell_2p1c::computeQpProperties()
   _vfrac[_qp]  = (_rho_m[_qp] - _rho_l[_qp]) / (_rho_g[_qp] - _rho_l[_qp]);
   _cp_m[_qp]  = eos_uo.cp_m_from_p_T(_P[_qp], _T[_qp], _vmfrac[_qp], _phase[_qp]);
 
-  std::cout<<_P[_qp]<< "  "<<_drho_m_dp[_qp]<< "  "<< _vfrac[_qp] <<std::endl;
   // To calculate the friction factor and Re No
   _u[_qp] = _flow[_qp] / _area[_qp];
   _Re[_qp] = _rho_m[_qp] * _dia[_qp] * _u[_qp] / viscosity_uo.mixture_mu(_P[_qp], _T[_qp], _vmfrac[_qp]);
