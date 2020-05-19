@@ -14,4 +14,9 @@
     input = 'HK_DFM.i'
     exodiff = 'HK_DFM_out.e'
   [../]
+  [./Shi_Drift_Flux_Model]
+    type = 'Exodiff'
+    input = 'Shi_DFM.i'
+    exodiff = 'Shi_DFM_out.e'
+  [../]
 []

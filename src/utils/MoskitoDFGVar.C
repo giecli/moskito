@@ -23,7 +23,7 @@
 
 #include "MoskitoDFGVar.h"
 
-MoskitoDFGVar::MoskitoDFGVar(Real v_m, Real rho_g, Real rho_l, const Real & mfrac,
+MoskitoDFGVar::MoskitoDFGVar(Real v_m, Real rho_g, Real rho_l, const Real & mfrac, const Real & vfrac,
   Real dia, const Real & dir, const Real & friction, const RealVectorValue & gravity,
   const RealVectorValue & well_dir)
   : _FlowPat(0),
@@ -35,6 +35,7 @@ MoskitoDFGVar::MoskitoDFGVar(Real v_m, Real rho_g, Real rho_l, const Real & mfra
     _rho_g(rho_g),
     _rho_l(rho_l),
     _mfrac(mfrac),
+    _vfrac(vfrac),
     _dia(dia),
     _dir(dir),
     _friction(friction),

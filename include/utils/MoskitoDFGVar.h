@@ -30,7 +30,7 @@
 class MoskitoDFGVar
 {
 public:
-  MoskitoDFGVar(Real v_m, Real rho_g, Real rho_l, const Real & mfrac, Real dia,
+  MoskitoDFGVar(Real v_m, Real rho_g, Real rho_l, const Real & mfrac, const Real & vfrac, Real dia,
     const Real & dir, const Real & friction, const RealVectorValue & gravity,
     const RealVectorValue & well_dir);
 
@@ -53,6 +53,8 @@ public:
   Real _rho_l;
   // Mass fraction of void phase
   const Real _mfrac;
+  // Volume fraction of void phase
+  const Real _vfrac;
   // Well diameter
   Real _dia;
   // Flow direction
