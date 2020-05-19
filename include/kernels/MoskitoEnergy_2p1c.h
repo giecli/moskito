@@ -71,4 +71,19 @@ protected:
 
   // The gravity acceleration as a vector
   const MaterialProperty<RealVectorValue> & _gravity;
+
+  // The kappa first derivatives
+  const MaterialProperty<Real> & _dkappa_dh;
+  // The kappa first derivatives
+  const MaterialProperty<Real> & _dkappa_dp;
+  // The kappa first derivatives
+  const MaterialProperty<Real> & _dkappa_dq;
+
+  // The omega first derivatives
+  const MaterialProperty<Real> & _domega_dh;
+  // The omega first derivatives
+  const MaterialProperty<Real> & _domega_dp;
+  // The omega first derivatives
+  const MaterialProperty<Real> & _domega_dq;
+
 };

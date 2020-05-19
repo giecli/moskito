@@ -58,7 +58,7 @@ public:
 protected:
   MoskitoWater97FluidProperties * _eos_lg;
 
-  virtual void h_lat(const Real & pressure, Real & hlat, Real & hsatl) const override;
+  virtual void h_lat(const Real & pressure, Real & hlat, Real & hsatl, Real & hsatg) const override;
 };
 
 #endif /* MOSKITOPUREWATER2P_H */

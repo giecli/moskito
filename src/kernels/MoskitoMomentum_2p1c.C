@@ -100,7 +100,7 @@ MoskitoMomentum_2p1c::computeQpJacobian()
   j += _dgamma2_dhq[_qp] * _grad_h[_qp] * _phi[_j][_qp];
   j += _dgamma2_dpq[_qp] * _grad_p[_qp] * _phi[_j][_qp];
   j += _dgamma2_dq2[_qp] * _grad_u[_qp] * _phi[_j][_qp];
-  j += _dgamma_dq[_qp] * _grad_phi[_j][_qp] / _area[_qp];
+  j += _dgamma_dq[_qp] * _grad_phi[_j][_qp];
   j *= _test[_i][_qp];
 
   return j * _well_dir[_qp];
