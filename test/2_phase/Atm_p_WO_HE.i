@@ -21,8 +21,10 @@
     ve_uo_liquid = viscosity_liqid
   [../]
   [./df]
-    type = MoskitoDFHK
+    type = MoskitoDFShi
     surface_tension = 0.0288
+    Pan_param_cMax = 1.2
+    Shi_param_Fv = 0.3
   [../]
   [./eos]
     type = MoskitoPureWater2P
