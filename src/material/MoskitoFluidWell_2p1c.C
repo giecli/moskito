@@ -157,7 +157,7 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
   rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
   vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac, 
+  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
       _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
   dfm_uo.DFMCalculator(DFinp);
   DFinp.DFMOutput(dummy, c0, u_d);
