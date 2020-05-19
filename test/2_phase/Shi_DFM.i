@@ -21,8 +21,10 @@
     ve_uo_liquid = viscosity_liqid
   [../]
   [./df]
-    type = MoskitoDFHK
+    type = MoskitoDFShi
     surface_tension = 0.0288
+    Pan_param_cMax = 1.2
+    Shi_param_Fv = 0.3
   [../]
   [./eos]
     type = MoskitoPureWater2P
@@ -43,7 +45,8 @@
     well_diameter = 0.1
     gravity = '9.8 0 0'
     outputs = exodus
-    output_properties = 'well_velocity gas_velocity liquid_velocity void_fraction flow_type_c0 drift_velocity flow_pattern current_phase mass_fraction'
+    output_properties = 'well_velocity gas_velocity liquid_velocity void_fraction flow_type_c0 drift_velocity flow_pattern current_phase mass_fractiongit log
+    '
   [../]
 []
 

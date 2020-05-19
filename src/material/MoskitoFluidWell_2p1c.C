@@ -104,8 +104,8 @@ MoskitoFluidWell_2p1c::computeQpProperties()
   else
     MoodyFrictionFactor(_friction[_qp], _rel_roughness, _Re[_qp], _roughness_type);
 
-  // To calculate drift-flux parameters
-    MoskitoDFGVar DFinp(_u[_qp], _rho_g[_qp], _rho_l[_qp], _vmfrac[_qp],
+  // drift-flux calculator section
+    MoskitoDFGVar DFinp(_u[_qp], _rho_g[_qp], _rho_l[_qp], _vmfrac[_qp], _vfrac[_qp],
       _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
     dfm_uo.DFMCalculator(DFinp);
     DFinp.DFMOutput(_flow_pat[_qp], _c0[_qp], _u_d[_qp]);
@@ -157,7 +157,7 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
   rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
   vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac,
+  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
       _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
   dfm_uo.DFMCalculator(DFinp);
   DFinp.DFMOutput(dummy, c0, u_d);
@@ -182,7 +182,7 @@ MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & q)
   rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
   vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac,
+  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
       _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
   dfm_uo.DFMCalculator(DFinp);
   DFinp.DFMOutput(dummy, c0, u_d);
@@ -207,7 +207,7 @@ MoskitoFluidWell_2p1c::omega(const Real & h, const Real & p, const Real & q)
   rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
   vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac,
+  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
       _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
   dfm_uo.DFMCalculator(DFinp);
   DFinp.DFMOutput(dummy, c0, u_d);
