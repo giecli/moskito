@@ -55,12 +55,15 @@ MoskitoTimeEnergy_2p1c::MoskitoTimeEnergy_2p1c(const InputParameters & parameter
     _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
     _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
     _drho_dph(getMaterialProperty<Real>("drho_dph")),
-    _dgamma_dh(getMaterialProperty<Real>("dgamma_dh")),
     _dgamma_dp(getMaterialProperty<Real>("dgamma_dp")),
+    _dgamma_dh(getMaterialProperty<Real>("dgamma_dh")),
     _dgamma_dq(getMaterialProperty<Real>("dgamma_dq")),
-    _dgamma2_dhq(getMaterialProperty<Real>("dgamma2_dhq")),
-    _dgamma2_dpq(getMaterialProperty<Real>("dgamma2_dpq")),
-    _dgamma2_dq2(getMaterialProperty<Real>("dgamma2_dq2"))
+    _dgamma_dph(getMaterialProperty<Real>("dgamma_dph")),
+    _dgamma_dpq(getMaterialProperty<Real>("dgamma_dpq")),
+    _dgamma_dhq(getMaterialProperty<Real>("dgamma_dhq")),
+    _dgamma_dp2(getMaterialProperty<Real>("dgamma_dp2")),
+    _dgamma_dh2(getMaterialProperty<Real>("dgamma_dh2")),
+    _dgamma_dq2(getMaterialProperty<Real>("dgamma_dq2"))
 {
 }
 
@@ -93,8 +96,11 @@ MoskitoTimeEnergy_2p1c::computeQpJacobian()
   j += (_drho_dp[_qp] * _p_dot[_qp] + _drho_dh[_qp] * _u_dot[_qp]);
   j += _drho_dh[_qp] * (_u_dot[_qp] + _q[_qp] * _q_dot[_qp] / (_area[_qp] * _area[_qp]));
   j += _rho[_qp] * _du_dot_du[_qp];
+
   j += _dgamma_dh[_qp] * _du_dot_du[_qp];
-  j += _dgamma2_dhq[_qp] * _q_dot[_qp];
+  j += _dgamma_dh2[_qp] * _u_dot[_qp];
+  j += _dgamma_dph[_qp] * _p_dot[_qp];
+  j += _dgamma_dhq[_qp] * _q_dot[_qp];
 
   return j * _test[_i][_qp] * _phi[_j][_qp];
 }
@@ -110,9 +116,9 @@ MoskitoTimeEnergy_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
     j += _rho[_qp] * _q_dot[_qp];
     j += _rho[_qp] * _q[_qp] * _dq_dot[_qp];
     j /= _area[_qp] * _area[_qp];
-    j += _dgamma2_dhq[_qp] * _u_dot[_qp];
-    j += _dgamma2_dpq[_qp] * _p_dot[_qp];
-    j += _dgamma2_dq2[_qp] * _q_dot[_qp];
+    j += _dgamma_dhq[_qp] * _u_dot[_qp];
+    j += _dgamma_dpq[_qp] * _p_dot[_qp];
+    j += _dgamma_dq2[_qp] * _q_dot[_qp];
     j += _dgamma_dq[_qp] * _dq_dot[_qp];
   }
 
@@ -124,8 +130,10 @@ MoskitoTimeEnergy_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
     j *= (_u[_qp] + _q[_qp] * _q[_qp] / (2.0 * _area[_qp] * _area[_qp]));
     j += _drho_dp[_qp] * (_u_dot[_qp] + _q[_qp] * _q_dot[_qp] / (_area[_qp] * _area[_qp]));
     j -= _dp_dot[_qp];
+    j += _dgamma_dph[_qp] * _u_dot[_qp];
+    j += _dgamma_dp2[_qp] * _p_dot[_qp];
     j += _dgamma_dp[_qp] * _dp_dot[_qp];
-    j += _dgamma2_dpq[_qp] * _q_dot[_qp];
+    j += _dgamma_dpq[_qp] * _q_dot[_qp];
   }
 
   return j * _test[_i][_qp] * _phi[_j][_qp];

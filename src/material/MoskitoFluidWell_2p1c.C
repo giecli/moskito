@@ -64,12 +64,15 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
     _u_d(declareProperty<Real>("drift_velocity")),
     _c0(declareProperty<Real>("flow_type_c0")),
     _flow_pat(declareProperty<Real>("flow_pattern")),
-    _dgamma_dh(declareProperty<Real>("dgamma_dh")),
     _dgamma_dp(declareProperty<Real>("dgamma_dp")),
+    _dgamma_dh(declareProperty<Real>("dgamma_dh")),
     _dgamma_dq(declareProperty<Real>("dgamma_dq")),
-    _dgamma2_dhq(declareProperty<Real>("dgamma2_dhq")),
-    _dgamma2_dpq(declareProperty<Real>("dgamma2_dpq")),
-    _dgamma2_dq2(declareProperty<Real>("dgamma2_dq2")),
+    _dgamma_dph(declareProperty<Real>("dgamma_dph")),
+    _dgamma_dpq(declareProperty<Real>("dgamma_dpq")),
+    _dgamma_dhq(declareProperty<Real>("dgamma_dhq")),
+    _dgamma_dp2(declareProperty<Real>("dgamma_dp2")),
+    _dgamma_dh2(declareProperty<Real>("dgamma_dh2")),
+    _dgamma_dq2(declareProperty<Real>("dgamma_dq2")),
     _dkappa_dh(declareProperty<Real>("dkappa_dh")),
     _dkappa_dp(declareProperty<Real>("dkappa_dp")),
     _dkappa_dq(declareProperty<Real>("dkappa_dq")),
@@ -232,7 +235,8 @@ void
 MoskitoFluidWell_2p1c::GammaDerivatives()
 {
   _dgamma_dh[_qp] = 0.0; _dgamma_dp[_qp] = 0.0; _dgamma_dq[_qp] = 0.0;
-  _dgamma2_dhq[_qp] = 0.0; _dgamma2_dpq[_qp] = 0.0; _dgamma2_dq2[_qp] = 0.0;
+  _dgamma_dpq[_qp] = 0.0; _dgamma_dhq[_qp] = 0.0; _dgamma_dph[_qp] = 0.0;
+  _dgamma_dh2[_qp] = 0.0; _dgamma_dp2[_qp] = 0.0; _dgamma_dq2[_qp] = 0.0;
 
   if (_phase[_qp] == 2.0)
   {
@@ -258,25 +262,44 @@ MoskitoFluidWell_2p1c::GammaDerivatives()
     _dgamma_dq[_qp] /= 2.0 * dq;
     }
 
+    if (dp * dh != 0.0)
+    {
+    _dgamma_dph[_qp]  = gamma(_h[_qp] + dh, _P[_qp] + dp, _flow[_qp]) + gamma(_h[_qp] - dh, _P[_qp] - dp, _flow[_qp]);
+    _dgamma_dph[_qp] -= gamma(_h[_qp] + dh, _P[_qp] - dp, _flow[_qp]) + gamma(_h[_qp] - dh, _P[_qp] + dp, _flow[_qp]);
+    _dgamma_dph[_qp] /= 4.0 * dh * dp;
+    }
+
     if (dh * dq != 0.0)
     {
-    _dgamma2_dhq[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] - dq);
-    _dgamma2_dhq[_qp] -= gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] - dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] + dq);
-    _dgamma2_dhq[_qp] /= 4.0 * dh * dq;
+    _dgamma_dhq[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] - dq);
+    _dgamma_dhq[_qp] -= gamma(_h[_qp] + dh, _P[_qp], _flow[_qp] - dq) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp] + dq);
+    _dgamma_dhq[_qp] /= 4.0 * dh * dq;
     }
 
     if (dp * dq != 0.0)
     {
-    _dgamma2_dpq[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] - dq);
-    _dgamma2_dpq[_qp] -= gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] - dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] + dq);
-    _dgamma2_dpq[_qp] /= 4.0 * dp * dq;
+    _dgamma_dpq[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] - dq);
+    _dgamma_dpq[_qp] -= gamma(_h[_qp], _P[_qp] + dp, _flow[_qp] - dq) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp] + dq);
+    _dgamma_dpq[_qp] /= 4.0 * dp * dq;
     }
 
+    if (dp != 0.0)
+    {
+    _dgamma_dp2[_qp]  = gamma(_h[_qp], _P[_qp] + dp, _flow[_qp]) + gamma(_h[_qp], _P[_qp] - dp, _flow[_qp]);
+    _dgamma_dp2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _flow[_qp]);
+    _dgamma_dp2[_qp] /=  dp * dp;
+    }
+    if (dh != 0.0)
+    {
+    _dgamma_dh2[_qp]  = gamma(_h[_qp] + dh, _P[_qp], _flow[_qp]) + gamma(_h[_qp] - dh, _P[_qp], _flow[_qp]);
+    _dgamma_dh2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _flow[_qp]);
+    _dgamma_dh2[_qp] /=  dh * dh;
+    }
     if (dq != 0.0)
     {
-    _dgamma2_dq2[_qp]  = gamma(_h[_qp], _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp], _flow[_qp] - dq);
-    _dgamma2_dq2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _flow[_qp]);
-    _dgamma2_dq2[_qp] /=  dq * dq;
+    _dgamma_dq2[_qp]  = gamma(_h[_qp], _P[_qp], _flow[_qp] + dq) + gamma(_h[_qp], _P[_qp], _flow[_qp] - dq);
+    _dgamma_dq2[_qp] -= 2.0 * gamma(_h[_qp], _P[_qp], _flow[_qp]);
+    _dgamma_dq2[_qp] /=  dq * dq;
     }
   }
 }

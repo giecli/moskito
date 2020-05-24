@@ -95,17 +95,23 @@ protected:
   MaterialProperty<Real> & _flow_pat;
 
   // The gamma first derivatives
-  MaterialProperty<Real> & _dgamma_dh;
-  // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dp;
+  // The gamma first derivatives
+  MaterialProperty<Real> & _dgamma_dh;
   // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dq;
   // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma2_dhq;
+  MaterialProperty<Real> & _dgamma_dph;
   // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma2_dpq;
+  MaterialProperty<Real> & _dgamma_dpq;
   // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma2_dq2;
+  MaterialProperty<Real> & _dgamma_dhq;
+  // The gamma second derivatives
+  MaterialProperty<Real> & _dgamma_dp2;
+  // The gamma second derivatives
+  MaterialProperty<Real> & _dgamma_dh2;
+  // The gamma second derivatives
+  MaterialProperty<Real> & _dgamma_dq2;
 
   // The kappa first derivatives
   MaterialProperty<Real> & _dkappa_dh;
