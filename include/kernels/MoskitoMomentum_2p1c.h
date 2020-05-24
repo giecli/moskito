@@ -56,6 +56,12 @@ protected:
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of mixture density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
+  // The second derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp_2;
+  // The second derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh_2;
+  // The second derivative of density wrt enthalpy and pressure
+  const MaterialProperty<Real> & _drho_dph;
   // The pipe Moody friction factor
   const MaterialProperty<Real> & _f;
   // The gravity acceleration as a vector
@@ -68,7 +74,7 @@ protected:
   const MaterialProperty<RealVectorValue> & _well_dir;
   // The flow direction
   const MaterialProperty<Real> & _well_sign;
-  
+
   // The gamma first derivatives
   const MaterialProperty<Real> & _dgamma_dh;
   // The gamma first derivatives

@@ -40,11 +40,14 @@ validParams<MoskitoTimeMass_2p1c>()
 
 MoskitoTimeMass_2p1c::MoskitoTimeMass_2p1c(const InputParameters & parameters)
   : TimeKernel(parameters),
-    _h_dot(coupledDot("enthalpy")),
-    _dh_dot(coupledDotDu("enthalpy")),
-    _h_var_number(coupled("enthalpy")),
-    _drho_dp(getMaterialProperty<Real>("drho_dp")),
-    _drho_dh(getMaterialProperty<Real>("drho_dh"))
+  _h_dot(coupledDot("enthalpy")),
+  _dh_dot(coupledDotDu("enthalpy")),
+  _h_var_number(coupled("enthalpy")),
+  _drho_dp(getMaterialProperty<Real>("drho_dp")),
+  _drho_dh(getMaterialProperty<Real>("drho_dh")),
+  _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
+  _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
+  _drho_dph(getMaterialProperty<Real>("drho_dph"))
 {
 }
 
@@ -65,8 +68,10 @@ MoskitoTimeMass_2p1c::computeQpJacobian()
 {
   Real j = 0.0;
 
-  j += _drho_dp[_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
-  j *= _test[_i][_qp];
+  j += _drho_dp_2[_qp] * _u_dot[_qp];
+  j += _drho_dp[_qp] * _du_dot_du[_qp];
+  j += _drho_dph[_qp] * _h_dot[_qp];
+  j *= _test[_i][_qp] * _phi[_j][_qp];
 
   return j;
 }
@@ -78,8 +83,10 @@ MoskitoTimeMass_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (jvar == _h_var_number)
   {
-    j += _drho_dh[_qp] * _phi[_j][_qp] * _dh_dot[_qp];
-    j *= _test[_i][_qp];
+    j += _drho_dph[_qp] * _u_dot[_qp];
+    j += _drho_dh_2[_qp] * _h_dot[_qp];
+    j += _drho_dh[_qp] * _dh_dot[_qp];
+    j *= _test[_i][_qp] * _phi[_j][_qp];
   }
 
   return j;

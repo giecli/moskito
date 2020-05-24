@@ -51,7 +51,10 @@ MoskitoTimeMomentum_2p1c::MoskitoTimeMomentum_2p1c(const InputParameters & param
     _area(getMaterialProperty<Real>("well_area")),
     _rho(getMaterialProperty<Real>("density")),
     _drho_dp(getMaterialProperty<Real>("drho_dp")),
-    _drho_dh(getMaterialProperty<Real>("drho_dh"))
+    _drho_dh(getMaterialProperty<Real>("drho_dh")),
+    _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
+    _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
+    _drho_dph(getMaterialProperty<Real>("drho_dph"))
 {
 }
 
@@ -90,16 +93,22 @@ MoskitoTimeMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (jvar == _p_var_number)
   {
-    j += _drho_dp[_qp] * _phi[_j][_qp] * _dp_dot[_qp] * _u[_qp];
-    j += _drho_dp[_qp] * _phi[_j][_qp] * _u_dot[_qp];
-    j *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
+    j += _drho_dp_2[_qp] * _p_dot[_qp];
+    j += _drho_dp[_qp] * _dp_dot[_qp];
+    j += _drho_dph[_qp] * _h_dot[_qp];
+    j *= _u[_qp];
+    j += _drho_dp[_qp] * _u_dot[_qp];
+    j *= _test[_i][_qp] * _phi[_j][_qp] * _well_sign[_qp] / _area[_qp];
   }
 
   if (jvar == _h_var_number)
   {
-    j += _drho_dh[_qp] * _phi[_j][_qp] * _dh_dot[_qp] * _u[_qp];
-    j += _drho_dh[_qp] * _phi[_j][_qp] * _u_dot[_qp];
-    j *= _test[_i][_qp] * _well_sign[_qp] / _area[_qp];
+    j += _drho_dph[_qp] * _p_dot[_qp];
+    j += _drho_dh_2[_qp] * _h_dot[_qp];
+    j += _drho_dh[_qp] * _dh_dot[_qp];
+    j *= _u[_qp];
+    j += _drho_dh[_qp] * _u_dot[_qp];
+    j *= _test[_i][_qp] * _phi[_j][_qp] * _well_sign[_qp] / _area[_qp];
   }
 
   return j;
