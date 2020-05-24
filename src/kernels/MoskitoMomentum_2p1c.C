@@ -21,24 +21,24 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoMomentum_2p.h"
+#include "MoskitoMomentum_2p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoMomentum_2p);
+registerMooseObject("MoskitoApp", MoskitoMomentum_2p1c);
 
 template <>
 InputParameters
-validParams<MoskitoMomentum_2p>()
+validParams<MoskitoMomentum_2p1c>()
 {
   InputParameters params = validParams<Kernel>();
 
   params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable");
   params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable");
   params.addClassDescription("Momentum conservation equation for 2 phase "
-        "(liquid and gas) pipe flow and it returns volumetric flowrate.");
+        "pipe flow and it returns volumetric flowrate.");
   return params;
 }
 
-MoskitoMomentum_2p::MoskitoMomentum_2p(const InputParameters & parameters)
+MoskitoMomentum_2p1c::MoskitoMomentum_2p1c(const InputParameters & parameters)
   : Kernel(parameters),
     _grad_p(coupledGradient("pressure")),
     _grad_h(coupledGradient("enthalpy")),
@@ -47,6 +47,9 @@ MoskitoMomentum_2p::MoskitoMomentum_2p(const InputParameters & parameters)
     _rho(getMaterialProperty<Real>("density")),
     _drho_dp(getMaterialProperty<Real>("drho_dp")),
     _drho_dh(getMaterialProperty<Real>("drho_dh")),
+    _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
+    _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
+    _drho_dph(getMaterialProperty<Real>("drho_dph")),
     _f(getMaterialProperty<Real>("well_moody_friction")),
     _gravity(getMaterialProperty<RealVectorValue>("gravity")),
     _area(getMaterialProperty<Real>("well_area")),
@@ -63,7 +66,7 @@ MoskitoMomentum_2p::MoskitoMomentum_2p(const InputParameters & parameters)
 }
 
 Real
-MoskitoMomentum_2p::computeQpResidual()
+MoskitoMomentum_2p1c::computeQpResidual()
 {
   RealVectorValue r = 0.0;
 
@@ -85,7 +88,7 @@ MoskitoMomentum_2p::computeQpResidual()
 }
 
 Real
-MoskitoMomentum_2p::computeQpJacobian()
+MoskitoMomentum_2p1c::computeQpJacobian()
 {
   RealVectorValue j = 0.0;
 
@@ -100,20 +103,22 @@ MoskitoMomentum_2p::computeQpJacobian()
   j += _dgamma2_dhq[_qp] * _grad_h[_qp] * _phi[_j][_qp];
   j += _dgamma2_dpq[_qp] * _grad_p[_qp] * _phi[_j][_qp];
   j += _dgamma2_dq2[_qp] * _grad_u[_qp] * _phi[_j][_qp];
-  j += _dgamma_dq[_qp] * _grad_phi[_j][_qp] / _area[_qp];
+  j += _dgamma_dq[_qp] * _grad_phi[_j][_qp];
   j *= _test[_i][_qp];
 
   return j * _well_dir[_qp];
 }
 
 Real
-MoskitoMomentum_2p::computeQpOffDiagJacobian(unsigned int jvar)
+MoskitoMomentum_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 {
   RealVectorValue j = 0.0;
 
   if (jvar == _p_var_number)
   {
+    j += _drho_dp_2[_qp] * _phi[_j][_qp] * _grad_p[_qp];
     j += _drho_dp[_qp] * _grad_phi[_j][_qp];
+    j += _drho_dph[_qp] * _phi[_j][_qp] * _grad_h[_qp];
     j *= _u[_qp] * _u[_qp];
     j += 2.0 * _drho_dp[_qp] * _phi[_j][_qp] * _u[_qp] * _grad_u[_qp];
     j += _well_sign[_qp] * _f[_qp] * _drho_dp[_qp] * _phi[_j][_qp] * _u[_qp]
@@ -128,7 +133,9 @@ MoskitoMomentum_2p::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (jvar == _h_var_number)
   {
+    j += _drho_dh_2[_qp] * _phi[_j][_qp] * _grad_h[_qp];
     j += _drho_dh[_qp] * _grad_phi[_j][_qp];
+    j += _drho_dph[_qp] * _phi[_j][_qp] * _grad_p[_qp];
     j *= _u[_qp] * _u[_qp];
     j += 2.0 * _drho_dh[_qp] * _phi[_j][_qp] * _u[_qp] * _grad_u[_qp];
     j += _well_sign[_qp] * _f[_qp] * _drho_dh[_qp] * _phi[_j][_qp] * _u[_qp]

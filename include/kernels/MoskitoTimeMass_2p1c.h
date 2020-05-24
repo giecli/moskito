@@ -23,38 +23,36 @@
 
 #pragma once
 
-#include "MoskitoFluidWellGeneral.h"
-#include "MoskitoEOS1P.h"
-#include "MoskitoViscosity1P.h"
+#include "TimeKernel.h"
 
-class MoskitoFluidWell1P;
+class MoskitoTimeMass_2p1c;
 
 template <>
-InputParameters validParams<MoskitoFluidWell1P>();
+InputParameters validParams<MoskitoTimeMass_2p1c>();
 
-class MoskitoFluidWell1P : public MoskitoFluidWellGeneral
+class MoskitoTimeMass_2p1c : public TimeKernel
 {
 public:
-  MoskitoFluidWell1P(const InputParameters & parameters);
-  virtual void computeQpProperties() override;
+  MoskitoTimeMass_2p1c(const InputParameters & parameters);
 
 protected:
-  // Userobject to equation of state
-  const MoskitoEOS1P & eos_uo;
-  // Userobject to Viscosity Eq
-  const MoskitoViscosity1P & viscosity_uo;
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  // The specific heat at constant pressure
-  MaterialProperty<Real> & _cp;
-  // The density
-  MaterialProperty<Real> & _rho;
+  // required values for enthalpy coupling
+  const VariableValue & _h_dot;
+  const VariableValue & _dh_dot;
+  const unsigned int _h_var_number;
+
   // The first derivative of density wrt pressure
-  MaterialProperty<Real> & _drho_dp;
-  // The first derivative of density wrt temperature
-  MaterialProperty<Real> & _drho_dT;
-  // Enthalpy from P and T
-  MaterialProperty<Real> & _h;
-
-  // The coupled temperature
-  const VariableValue & _T;
+  const MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh;
+  // The second derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp_2;
+  // The second derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh_2;
+  // The second derivative of density wrt enthalpy and pressure
+  const MaterialProperty<Real> & _drho_dph;
 };

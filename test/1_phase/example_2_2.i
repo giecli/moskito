@@ -24,7 +24,7 @@
 
 [Materials]
   [./area0]
-    type = MoskitoFluidWell1P
+    type = MoskitoFluidWell_1p1c
     pressure = p
     temperature = T
     flowrate = q

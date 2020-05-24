@@ -23,51 +23,38 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "MoskitoFluidWellGeneral.h"
+#include "MoskitoEOS1P.h"
+#include "MoskitoViscosity1P.h"
 
-class MoskitoMass_2p1c;
+class MoskitoFluidWell_1p1c;
 
 template <>
-InputParameters validParams<MoskitoMass_2p1c>();
+InputParameters validParams<MoskitoFluidWell_1p1c>();
 
-class MoskitoMass_2p1c : public Kernel
+class MoskitoFluidWell_1p1c : public MoskitoFluidWellGeneral
 {
 public:
-  MoskitoMass_2p1c(const InputParameters & parameters);
+  MoskitoFluidWell_1p1c(const InputParameters & parameters);
+  virtual void computeQpProperties() override;
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
+  // Userobject to equation of state
+  const MoskitoEOS1P & eos_uo;
+  // Userobject to Viscosity Eq
+  const MoskitoViscosity1P & viscosity_uo;
 
-  // The coupled flow_rate
-  const VariableValue & _q;
-
-  // The gradient of the coupled flow_rate
-  const VariableGradient & _grad_q;
-  // The gradient of the coupled specific enthalpy
-  const VariableGradient & _grad_h;
-
-  // Variable numberings
-  unsigned _q_var_number;
-  unsigned _h_var_number;
-
-  // The area of pipe
-  const MaterialProperty<Real> & _area;
-  // The unit vector of well direction
-  const MaterialProperty<RealVectorValue> & _well_dir;
-  // The sign of well flow direction
-  const MaterialProperty<Real> & _well_sign;
+  // The specific heat at constant pressure
+  MaterialProperty<Real> & _cp;
   // The density
-  const MaterialProperty<Real> & _rho;
+  MaterialProperty<Real> & _rho;
   // The first derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp;
-  // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The second derivative of density wrt enthalpy and pressure
-  const MaterialProperty<Real> & _drho_dph;
+  MaterialProperty<Real> & _drho_dp;
+  // The first derivative of density wrt temperature
+  MaterialProperty<Real> & _drho_dT;
+  // Enthalpy from P and T
+  MaterialProperty<Real> & _h;
+
+  // The coupled temperature
+  const VariableValue & _T;
 };

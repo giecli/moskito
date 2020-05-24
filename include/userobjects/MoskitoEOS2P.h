@@ -62,14 +62,17 @@ public:
   virtual void rho_m_by_h(
       const Real & pressure, const Real & enthalpy, Real & rho, Real & drho_dh, Real & drho_dh_2) const;
 
+  virtual void rho_m_by_ph(
+      const Real & pressure, const Real & enthalpy, Real & drho_dph) const;
+
   // virtual void rho_m_by_T(
   //     const Real & pressure, const Real & enthalpy, Real & rho, Real & drho_dT, Real & drho_dT_2) const = 0;
 
   virtual Real rho_m_from_p_h(const Real & pressure, const Real & enthalpy) const = 0;
 
-protected:
-  virtual void h_lat(const Real & pressure, Real & hlat, Real & hsatl) const = 0;
+  virtual void h_lat(const Real & pressure, Real & hlat, Real & hsatl, Real & hsatg) const = 0;
 
+protected:
   const Real _tol;
 };
 

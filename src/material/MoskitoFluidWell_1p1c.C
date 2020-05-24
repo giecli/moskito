@@ -21,13 +21,13 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoFluidWell1P.h"
+#include "MoskitoFluidWell_1p1c.h"
 
-registerMooseObject("MoskitoApp", MoskitoFluidWell1P);
+registerMooseObject("MoskitoApp", MoskitoFluidWell_1p1c);
 
 template <>
 InputParameters
-validParams<MoskitoFluidWell1P>()
+validParams<MoskitoFluidWell_1p1c>()
 {
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
   params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable (K)");
@@ -39,7 +39,7 @@ validParams<MoskitoFluidWell1P>()
   return params;
 }
 
-MoskitoFluidWell1P::MoskitoFluidWell1P(const InputParameters & parameters)
+MoskitoFluidWell_1p1c::MoskitoFluidWell_1p1c(const InputParameters & parameters)
   : MoskitoFluidWellGeneral(parameters),
     eos_uo(getUserObject<MoskitoEOS1P>("eos_uo")),
     viscosity_uo(getUserObject<MoskitoViscosity1P>("viscosity_uo")),
@@ -53,30 +53,21 @@ MoskitoFluidWell1P::MoskitoFluidWell1P(const InputParameters & parameters)
 }
 
 void
-MoskitoFluidWell1P::computeQpProperties()
+MoskitoFluidWell_1p1c::computeQpProperties()
 {
+  MoskitoFluidWellGeneral::computeQpProperties();
+
   _cp[_qp] = eos_uo.cp(_P[_qp], _T[_qp]);
   _h[_qp] = eos_uo.h_from_p_T(_P[_qp], _T[_qp]);
-
   eos_uo.rho_from_p_T(_P[_qp], _T[_qp], _rho[_qp], _drho_dp[_qp], _drho_dT[_qp]);
-
-  _dia[_qp] = _d;
-  if (!(_area_defined*_perimeter_defined))
-  {
-    _area[_qp] = PI * _dia[_qp] * _dia[_qp] / 4.0;
-    _perimeter[_qp] = PI * _dia[_qp];
-  }
-  else
-  {
-    _area[_qp] = _u_area;
-    _perimeter[_qp] = _u_perimeter;
-  }
 
   _u[_qp] = _flow[_qp] / _area[_qp];
   _Re[_qp] = _rho[_qp] * _dia[_qp] * fabs(_u[_qp]) / viscosity_uo.mu(_P[_qp], _T[_qp]);
+  if (_f_defined)
+    _friction[_qp] = _u_f;
+  else
+    MoodyFrictionFactor(_friction[_qp], _rel_roughness, _Re[_qp], _roughness_type);
 
   _lambda[_qp]  = (1.0 - (_d * _d) / std::pow(_d + _thickness , 2.0)) * _lambda0;
   _lambda[_qp] += (_d * _d) / std::pow(_d + _thickness , 2.0) * eos_uo.lambda(_P[_qp], _T[_qp]);
-
-  MoskitoFluidWellGeneral::computeQpProperties();
 }

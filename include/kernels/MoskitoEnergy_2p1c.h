@@ -68,7 +68,28 @@ protected:
   const MaterialProperty<Real> & _drho_dp;
   // The first derivative of density wrt enthalpy
   const MaterialProperty<Real> & _drho_dh;
+  // The second derivative of density wrt pressure
+  const MaterialProperty<Real> & _drho_dp_2;
+  // The second derivative of density wrt enthalpy
+  const MaterialProperty<Real> & _drho_dh_2;
+  // The second derivative of density wrt enthalpy and pressure
+  const MaterialProperty<Real> & _drho_dph;
 
   // The gravity acceleration as a vector
   const MaterialProperty<RealVectorValue> & _gravity;
+
+  // The kappa first derivatives
+  const MaterialProperty<Real> & _dkappa_dh;
+  // The kappa first derivatives
+  const MaterialProperty<Real> & _dkappa_dp;
+  // The kappa first derivatives
+  const MaterialProperty<Real> & _dkappa_dq;
+
+  // The omega first derivatives
+  const MaterialProperty<Real> & _domega_dh;
+  // The omega first derivatives
+  const MaterialProperty<Real> & _domega_dp;
+  // The omega first derivatives
+  const MaterialProperty<Real> & _domega_dq;
+
 };

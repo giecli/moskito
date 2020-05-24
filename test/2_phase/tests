@@ -9,9 +9,9 @@
     input = 'HK_validation.i'
     exodiff = 'HK_validation_out.e'
   [../]
-  [./Hasan_Kabir_Drift_Flux_Model]
+  [./Shi_Drift_Flux_Model]
     type = 'Exodiff'
-    input = 'HK_DFM.i'
-    exodiff = 'HK_DFM_out.e'
+    input = 'Shi_DFM.i'
+    exodiff = 'Shi_DFM_out.e'
   [../]
 []

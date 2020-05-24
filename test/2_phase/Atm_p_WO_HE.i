@@ -21,8 +21,10 @@
     ve_uo_liquid = viscosity_liqid
   [../]
   [./df]
-    type = MoskitoDFHK
+    type = MoskitoDFShi
     surface_tension = 0.0288
+    Pan_param_cMax = 1.2
+    Shi_param_Fv = 0.3
   [../]
   [./eos]
     type = MoskitoPureWater2P
@@ -32,7 +34,7 @@
 
 [Materials]
   [./area]
-    type = MoskitoFluidWell_2p
+    type = MoskitoFluidWell_2p1c
     well_diameter = 0.1
     pressure = p
     enthalpy = h
@@ -54,7 +56,7 @@
     type = DirichletBC
     variable = p
     boundary = left
-    value = 100000
+    value = 1e5
   [../]
   [./qbc]
     type = DirichletBC
@@ -65,30 +67,25 @@
 []
 
 [Variables]
-  [./h]
-    [./InitialCondition]
-      type = FunctionIC
-      variable = h
-      function = 5e5
-    [../]
-  [../]
   [./p]
     [./InitialCondition]
       type = FunctionIC
-      variable = p
       function = '90000+400*x'
     [../]
   [../]
   [./q]
-    scaling = 1e-6
+  [../]
+[]
+
+[AuxVariables]
+  [./h]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 5e5
   [../]
 []
 
 [Kernels]
-  [./hkernel]
-    type = NullKernel
-    variable = h
-  [../]
   [./pkernel]
     type = MoskitoMass_2p1c
     variable = p
@@ -96,7 +93,7 @@
     enthalpy = h
   [../]
   [./qkernel]
-    type = MoskitoMomentum_2p
+    type = MoskitoMomentum_2p1c
     variable = q
     pressure = p
     enthalpy = h
@@ -119,6 +116,20 @@
   [../]
 []
 
+[Dampers]
+  # [./test]
+  #   type = MaxIncrement
+  #   variable = p
+  #   max_increment = 0.1
+  #   increment_type = fractional
+  # [../]
+  # [./test]
+  #   type = BoundingValueNodalDamper
+  #   variable = p
+  #   min_value = 1e4
+  # [../]
+[]
+
 [Executioner]
   type = Steady
   l_max_its = 50
@@ -126,6 +137,7 @@
   l_tol = 1e-8
   nl_rel_tol = 1e-8
   solve_type = NEWTON
+  automatic_scaling = true
 []
 
 [Outputs]

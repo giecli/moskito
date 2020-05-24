@@ -101,15 +101,20 @@ MoskitoFluidWellGeneral::MoskitoFluidWellGeneral(const InputParameters & paramet
 void
 MoskitoFluidWellGeneral::computeQpProperties()
 {
-  if (_f_defined)
-    _friction[_qp] = _u_f;
+  _dia[_qp] = _d;
+  if (!(_area_defined*_perimeter_defined))
+  {
+    _area[_qp] = PI * _dia[_qp] * _dia[_qp] / 4.0;
+    _perimeter[_qp] = PI * _dia[_qp];
+  }
   else
-    MoodyFrictionFactor(_friction[_qp], _rel_roughness, _Re[_qp], _roughness_type);
+  {
+    _area[_qp] = _u_area;
+    _perimeter[_qp] = _u_perimeter;
+  }
 
   _well_dir[_qp] = WellUnitVector();
-
   _gravity[_qp] = _g;
-
   _well_sign[_qp] = _well_type;
 }
 
@@ -151,45 +156,22 @@ MoskitoFluidWellGeneral::WellUnitVector()
   switch (_well_direction)
   {
     case 1:
-      if (p0(0) > p1(0))
-        p = p0 - p1;
-      else
-        p = p1 - p0;
+      p0(0) > p1(0) ? p = p0 - p1 : p = p1 - p0;
       break;
-
     case 2:
-      if (p0(0) < p1(0))
-        p = p0 - p1;
-      else
-        p = p1 - p0;
+      p0(0) < p1(0) ? p = p0 - p1 : p = p1 - p0;
       break;
-
     case 3:
-      if (p0(1) > p1(1))
-        p = p0 - p1;
-      else
-        p = p1 - p0;
+      p0(1) > p1(1) ? p = p0 - p1 : p = p1 - p0;
       break;
-
     case 4:
-      if (p0(1) < p1(1))
-        p = p0 - p1;
-      else
-        p = p1 - p0;
+      p0(1) < p1(1) ? p = p0 - p1 : p = p1 - p0;
       break;
-
     case 5:
-      if (p0(2) > p1(2))
-        p = p0 - p1;
-      else
-        p = p1 - p0;
+      p0(2) > p1(2) ? p = p0 - p1 : p = p1 - p0;
       break;
-
     case 6:
-      if (p0(2) < p1(2))
-        p = p0 - p1;
-      else
-        p = p1 - p0;
+      p0(2) < p1(2) ? p = p0 - p1 : p = p1 - p0;
       break;
   }
 

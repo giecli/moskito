@@ -28,18 +28,23 @@
 #include "MoskitoViscosity2P.h"
 #include "MoskitoDriftFlux.h"
 
-class MoskitoFluidWell_2p;
+class MoskitoFluidWell_2p1c;
 
 template <>
-InputParameters validParams<MoskitoFluidWell_2p>();
+InputParameters validParams<MoskitoFluidWell_2p1c>();
 
-class MoskitoFluidWell_2p : public MoskitoFluidWellGeneral
+class MoskitoFluidWell_2p1c : public MoskitoFluidWellGeneral
 {
 public:
-  MoskitoFluidWell_2p(const InputParameters & parameters);
+  MoskitoFluidWell_2p1c(const InputParameters & parameters);
   virtual void computeQpProperties() override;
+  void PhaseVelocities();
   void GammaDerivatives();
+  void KappaDerivatives();
+  void OmegaDerivatives();
   Real gamma(const Real & h, const Real & p, const Real & q);
+  Real kappa(const Real & h, const Real & p, const Real & q);
+  Real omega(const Real & h, const Real & p, const Real & q);
 
 protected:
   // Userobject to equation of state
@@ -65,12 +70,12 @@ protected:
   MaterialProperty<Real> & _drho_m_dp;
   // The second derivative of mixture density wrt pressure
   MaterialProperty<Real> & _drho_m_dp_2;
-  // The first derivative of mixture density wrt temperature
-  MaterialProperty<Real> & _drho_m_dT;
   // The first derivative of mixture density wrt enthalpy
   MaterialProperty<Real> & _drho_m_dh;
   // The second derivative of mixture density wrt enthalpy
   MaterialProperty<Real> & _drho_m_dh_2;
+  // The second derivative of mixture density wrt enthalpy and pressure
+  MaterialProperty<Real> & _drho_m_dph;
   // mass_fraction
   MaterialProperty<Real> & _vmfrac;
   // Gas velocity
@@ -88,9 +93,6 @@ protected:
   MaterialProperty<Real> & _c0;
   // flow pattern
   MaterialProperty<Real> & _flow_pat;
-  // superficial velocities calculated by HK
-  MaterialProperty<Real> &_v_sg;
-  MaterialProperty<Real> &_v_sl;
 
   // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dh;
@@ -104,6 +106,20 @@ protected:
   MaterialProperty<Real> & _dgamma2_dpq;
   // The gamma second derivatives
   MaterialProperty<Real> & _dgamma2_dq2;
+
+  // The kappa first derivatives
+  MaterialProperty<Real> & _dkappa_dh;
+  // The kappa first derivatives
+  MaterialProperty<Real> & _dkappa_dp;
+  // The kappa first derivatives
+  MaterialProperty<Real> & _dkappa_dq;
+
+  // The omega first derivatives
+  MaterialProperty<Real> & _domega_dh;
+  // The omega first derivatives
+  MaterialProperty<Real> & _domega_dp;
+  // The omega first derivatives
+  MaterialProperty<Real> & _domega_dq;
 
   // The coupled enthalpy
   const VariableValue & _h;

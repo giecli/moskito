@@ -21,53 +21,73 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#pragma once
+#include "MoskitoTimeMass_2p1c.h"
 
-#include "Kernel.h"
-
-class MoskitoMass_2p1c;
+registerMooseObject("MoskitoApp", MoskitoTimeMass_2p1c);
 
 template <>
-InputParameters validParams<MoskitoMass_2p1c>();
-
-class MoskitoMass_2p1c : public Kernel
+InputParameters
+validParams<MoskitoTimeMass_2p1c>()
 {
-public:
-  MoskitoMass_2p1c(const InputParameters & parameters);
+  InputParameters params = validParams<TimeKernel>();
 
-protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
+  params.addRequiredCoupledVar("enthalpy", "Enthalpy nonlinear variable");
+  params.addClassDescription("Time derivative part of mass conservation equation for "
+                  "2 phase pipe flow and it returns pressure");
 
-  // The coupled flow_rate
-  const VariableValue & _q;
+  return params;
+}
 
-  // The gradient of the coupled flow_rate
-  const VariableGradient & _grad_q;
-  // The gradient of the coupled specific enthalpy
-  const VariableGradient & _grad_h;
+MoskitoTimeMass_2p1c::MoskitoTimeMass_2p1c(const InputParameters & parameters)
+  : TimeKernel(parameters),
+  _h_dot(coupledDot("enthalpy")),
+  _dh_dot(coupledDotDu("enthalpy")),
+  _h_var_number(coupled("enthalpy")),
+  _drho_dp(getMaterialProperty<Real>("drho_dp")),
+  _drho_dh(getMaterialProperty<Real>("drho_dh")),
+  _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
+  _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
+  _drho_dph(getMaterialProperty<Real>("drho_dph"))
+{
+}
 
-  // Variable numberings
-  unsigned _q_var_number;
-  unsigned _h_var_number;
+Real
+MoskitoTimeMass_2p1c::computeQpResidual()
+{
+  Real r = 0.0;
 
-  // The area of pipe
-  const MaterialProperty<Real> & _area;
-  // The unit vector of well direction
-  const MaterialProperty<RealVectorValue> & _well_dir;
-  // The sign of well flow direction
-  const MaterialProperty<Real> & _well_sign;
-  // The density
-  const MaterialProperty<Real> & _rho;
-  // The first derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp;
-  // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The second derivative of density wrt enthalpy and pressure
-  const MaterialProperty<Real> & _drho_dph;
-};
+  r += _drho_dp[_qp] * _u_dot[_qp];
+  r += _drho_dh[_qp] * _h_dot[_qp];
+  r *= _test[_i][_qp];
+
+  return r;
+}
+
+Real
+MoskitoTimeMass_2p1c::computeQpJacobian()
+{
+  Real j = 0.0;
+
+  j += _drho_dp_2[_qp] * _u_dot[_qp];
+  j += _drho_dp[_qp] * _du_dot_du[_qp];
+  j += _drho_dph[_qp] * _h_dot[_qp];
+  j *= _test[_i][_qp] * _phi[_j][_qp];
+
+  return j;
+}
+
+Real
+MoskitoTimeMass_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  Real j = 0.0;
+
+  if (jvar == _h_var_number)
+  {
+    j += _drho_dph[_qp] * _u_dot[_qp];
+    j += _drho_dh_2[_qp] * _h_dot[_qp];
+    j += _drho_dh[_qp] * _dh_dot[_qp];
+    j *= _test[_i][_qp] * _phi[_j][_qp];
+  }
+
+  return j;
+}
