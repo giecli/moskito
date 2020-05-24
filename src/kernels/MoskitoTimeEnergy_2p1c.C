@@ -52,6 +52,9 @@ MoskitoTimeEnergy_2p1c::MoskitoTimeEnergy_2p1c(const InputParameters & parameter
     _rho(getMaterialProperty<Real>("density")),
     _drho_dp(getMaterialProperty<Real>("drho_dp")),
     _drho_dh(getMaterialProperty<Real>("drho_dh")),
+    _drho_dp_2(getMaterialProperty<Real>("drho_dp_2")),
+    _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
+    _drho_dph(getMaterialProperty<Real>("drho_dph")),
     _dgamma_dh(getMaterialProperty<Real>("dgamma_dh")),
     _dgamma_dp(getMaterialProperty<Real>("dgamma_dp")),
     _dgamma_dq(getMaterialProperty<Real>("dgamma_dq")),
@@ -83,15 +86,17 @@ MoskitoTimeEnergy_2p1c::computeQpJacobian()
 {
   Real j = 0.0;
 
-  j += _drho_dh[_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
-  j *= (_u[_qp] + _q[_qp] * _q[_qp] / (2.0 * _area[_qp] * _area[_qp]));
-  j += (_drho_dp[_qp] * _p_dot[_qp] + _drho_dh[_qp] * _u_dot[_qp]) * _phi[_j][_qp];
-  j += _drho_dh[_qp] * _phi[_j][_qp] * (_u_dot[_qp] + _q[_qp] * _q_dot[_qp] / (_area[_qp] * _area[_qp]));
-  j += _rho[_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
-  j += _dgamma_dh[_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
-  j += _dgamma2_dhq[_qp] * _phi[_j][_qp] * _q_dot[_qp];
+  j += _drho_dph[_qp] * _p_dot[_qp];
+  j += _drho_dh_2[_qp] * _u_dot[_qp];
+  j += _drho_dh[_qp] * _du_dot_du[_qp];
+  j *= _u[_qp] + _q[_qp] * _q[_qp] / (2.0 * _area[_qp] * _area[_qp]);
+  j += (_drho_dp[_qp] * _p_dot[_qp] + _drho_dh[_qp] * _u_dot[_qp]);
+  j += _drho_dh[_qp] * (_u_dot[_qp] + _q[_qp] * _q_dot[_qp] / (_area[_qp] * _area[_qp]));
+  j += _rho[_qp] * _du_dot_du[_qp];
+  j += _dgamma_dh[_qp] * _du_dot_du[_qp];
+  j += _dgamma2_dhq[_qp] * _q_dot[_qp];
 
-  return j * _test[_i][_qp];
+  return j * _test[_i][_qp] * _phi[_j][_qp];
 }
 
 Real
@@ -101,27 +106,27 @@ MoskitoTimeEnergy_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (jvar == _q_var_number)
   {
-    j += _drho_dp[_qp] * _p_dot[_qp];
-    j += _drho_dh[_qp] * _u_dot[_qp];
-    j *= _q[_qp] * _phi[_j][_qp];
-    j += _rho[_qp] * _phi[_j][_qp] * _q_dot[_qp];
-    j += _rho[_qp] * _q[_qp] * _phi[_j][_qp] * _dq_dot[_qp];
+    j += (_drho_dp[_qp] * _p_dot[_qp] + _drho_dh[_qp] * _u_dot[_qp]) * _q[_qp];
+    j += _rho[_qp] * _q_dot[_qp];
+    j += _rho[_qp] * _q[_qp] * _dq_dot[_qp];
     j /= _area[_qp] * _area[_qp];
-    j += _dgamma2_dhq[_qp] * _phi[_j][_qp] * _u_dot[_qp];
-    j += _dgamma2_dpq[_qp] * _phi[_j][_qp] * _p_dot[_qp];
-    j += _dgamma2_dq2[_qp] * _phi[_j][_qp] * _q_dot[_qp];
-    j += _dgamma_dq[_qp] * _phi[_j][_qp] * _dq_dot[_qp];
+    j += _dgamma2_dhq[_qp] * _u_dot[_qp];
+    j += _dgamma2_dpq[_qp] * _p_dot[_qp];
+    j += _dgamma2_dq2[_qp] * _q_dot[_qp];
+    j += _dgamma_dq[_qp] * _dq_dot[_qp];
   }
 
   if (jvar == _p_var_number)
   {
-    j += _drho_dp[_qp] * _phi[_j][_qp] * _dp_dot[_qp];
+    j += _drho_dp_2[_qp] * _p_dot[_qp];
+    j += _drho_dph[_qp] * _u_dot[_qp];
+    j += _drho_dp[_qp] * _dp_dot[_qp];
     j *= (_u[_qp] + _q[_qp] * _q[_qp] / (2.0 * _area[_qp] * _area[_qp]));
-    j += _drho_dp[_qp] * _phi[_j][_qp] * (_u_dot[_qp] + _q[_qp] * _q_dot[_qp] / (_area[_qp] * _area[_qp]));
-    j -= _phi[_j][_qp] * _dp_dot[_qp];
-    j += _dgamma_dp[_qp] * _phi[_j][_qp] * _dp_dot[_qp];
-    j += _dgamma2_dpq[_qp] * _phi[_j][_qp] * _q_dot[_qp];
+    j += _drho_dp[_qp] * (_u_dot[_qp] + _q[_qp] * _q_dot[_qp] / (_area[_qp] * _area[_qp]));
+    j -= _dp_dot[_qp];
+    j += _dgamma_dp[_qp] * _dp_dot[_qp];
+    j += _dgamma2_dpq[_qp] * _q_dot[_qp];
   }
 
-  return j * _test[_i][_qp];
+  return j * _test[_i][_qp] * _phi[_j][_qp];
 }
