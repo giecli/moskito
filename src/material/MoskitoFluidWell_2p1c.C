@@ -161,24 +161,28 @@ MoskitoFluidWell_2p1c::PhaseVelocities()
 Real
 MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
 {
-  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, rho_pam, dummy, c0, u_d;
+  Real vmfrac, T, phase, gamma = 0.0;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
-  rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
-  rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
-  rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
-  vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
-      _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
-  dfm_uo.DFMCalculator(DFinp);
-  DFinp.DFMOutput(dummy, c0, u_d);
+  if(phase == 2.0)
+  {
+    Real vfrac, rho_l, rho_g, rho_m, rho_pam, dummy, c0, u_d;
+    rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
+    rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
+    rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
+    vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
+    MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
+        _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
+    dfm_uo.DFMCalculator(DFinp);
+    DFinp.DFMOutput(dummy, c0, u_d);
 
-  Real gamma = 0.0;
-  gamma  = vfrac / (1.0 - vfrac);
-  gamma *= rho_g * rho_l * rho_m / (rho_pam * rho_pam);
-  gamma *= std::pow((c0 - 1.0) * q / _area[_qp] + u_d , 2.0);
+    rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
+
+    gamma  = vfrac / (1.0 - vfrac);
+    gamma *= rho_g * rho_l * rho_m / (rho_pam * rho_pam);
+    gamma *= std::pow((c0 - 1.0) * q / _area[_qp] + u_d , 2.0);
+  }
 
   return gamma;
 }
@@ -186,24 +190,28 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
 Real
 MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & q)
 {
-  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, rho_pam, h_g, h_l, dummy, c0, u_d;
+  Real vmfrac, T, phase, kappa = 0.0;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
-  rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
-  rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
-  rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
-  vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
-      _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
-  dfm_uo.DFMCalculator(DFinp);
-  DFinp.DFMOutput(dummy, c0, u_d);
+  if(phase == 2.0)
+  {
+    Real vfrac, rho_l, rho_g, rho_m, rho_pam, h_g, h_l, dummy, c0, u_d;
+    rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
+    rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
+    rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
+    vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
-  eos_uo.h_lat(p, dummy, h_l, h_g);
+    MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
+        _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
+    dfm_uo.DFMCalculator(DFinp);
+    DFinp.DFMOutput(dummy, c0, u_d);
 
-  Real kappa = 0.0;
-  kappa  = vfrac * rho_g * rho_l / rho_pam * (h_g - h_l);
-  kappa *= std::pow((c0 - 1.0) * q / _area[_qp] + u_d , 2.0);
+    rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
+    eos_uo.h_lat(p, dummy, h_l, h_g);
+
+    kappa  = vfrac * rho_g * rho_l / rho_pam * (h_g - h_l);
+    kappa *= std::pow((c0 - 1.0) * q / _area[_qp] + u_d , 2.0);
+  }
 
   return kappa;
 }
@@ -211,28 +219,33 @@ MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & q)
 Real
 MoskitoFluidWell_2p1c::omega(const Real & h, const Real & p, const Real & q)
 {
-  Real vmfrac, vfrac, T, phase, rho_l, rho_g, rho_m, u_g, u_l, rho_pam, dummy, c0, u_d;
+  Real vmfrac, T, phase, omega = 0.0;
   eos_uo.VMFrac_T_from_p_h(p, h, vmfrac, T, phase);
-  rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
-  rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
-  rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
-  vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
-      _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
-  dfm_uo.DFMCalculator(DFinp);
-  DFinp.DFMOutput(dummy, c0, u_d);
+  if(phase == 2.0)
+  {
+    Real vfrac, rho_l, rho_g, rho_m, u_g, u_l, rho_pam, dummy, c0, u_d;
+    rho_l = eos_uo.rho_l_from_p_T(p, T, phase);
+    rho_g = eos_uo.rho_g_from_p_T(p, T, phase);
+    rho_m = rho_l * rho_g / (vmfrac * (rho_l - rho_g) + rho_g);
+    vfrac = (rho_m - rho_l) / (rho_g - rho_l);
 
-  rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
+    MoskitoDFGVar DFinp(q / _area[_qp], rho_g, rho_l, vmfrac, vfrac,
+        _dia[_qp], _well_sign[_qp], _friction[_qp], _gravity[_qp], _well_dir[_qp]);
+    dfm_uo.DFMCalculator(DFinp);
+    DFinp.DFMOutput(dummy, c0, u_d);
 
-  u_g  = (c0 * rho_m * q / _area[_qp] + rho_l * u_d) / rho_pam;
-  u_l  = (1.0 - vfrac * c0) * rho_m * q / _area[_qp] - rho_g * vfrac * u_d;
-  u_l /= (1.0 - vfrac) * rho_pam;
+    rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
 
-  Real omega = 0.0;
-  omega  = 3.0 * u_g * u_l * q / _area[_qp];
-  omega -= (rho_g * vfrac * std::pow(u_l,3.0) + rho_l * (1.0 - vfrac) * std::pow(u_g,3.0)) / rho_m;
-  omega *= 0.5 * vfrac * (1.0 - vfrac) * rho_g * rho_l / rho_m;
+    u_g  = (c0 * rho_m * q / _area[_qp] + rho_l * u_d) / rho_pam;
+    u_l  = (1.0 - vfrac * c0) * rho_m * q / _area[_qp] - rho_g * vfrac * u_d;
+    u_l /= (1.0 - vfrac) * rho_pam;
+
+    omega -= 3.0 * u_g * u_l * q / _area[_qp];
+    omega += std::pow(u_g,3.0) * (1.0 + rho_g * vfrac /rho_m);
+    omega += std::pow(u_l,3.0) * (1.0 + rho_l * (1.0 - vfrac) / rho_m);
+    omega *= 0.5 * vfrac * (1.0 - vfrac) * rho_g * rho_l / rho_m;
+  }
 
   return omega;
 }
@@ -240,7 +253,7 @@ MoskitoFluidWell_2p1c::omega(const Real & h, const Real & p, const Real & q)
 void
 MoskitoFluidWell_2p1c::GammaDerivatives()
 {
-  _dgamma_dh[_qp] = 0.0; _dgamma_dp[_qp] = 0.0; _dgamma_dq[_qp] = 0.0;
+  _dgamma_dh[_qp]  = 0.0; _dgamma_dp[_qp]  = 0.0; _dgamma_dq[_qp]  = 0.0;
   _dgamma_dpq[_qp] = 0.0; _dgamma_dhq[_qp] = 0.0; _dgamma_dph[_qp] = 0.0;
   _dgamma_dh2[_qp] = 0.0; _dgamma_dp2[_qp] = 0.0; _dgamma_dq2[_qp] = 0.0;
 
