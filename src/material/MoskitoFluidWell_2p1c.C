@@ -73,8 +73,8 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
     _dgamma_dp2(declareProperty<Real>("dgamma_dp2")),
     _dgamma_dh2(declareProperty<Real>("dgamma_dh2")),
     _dgamma_dq2(declareProperty<Real>("dgamma_dq2")),
-    _dkappa_dh(declareProperty<Real>("dkappa_dh")),
     _dkappa_dp(declareProperty<Real>("dkappa_dp")),
+    _dkappa_dh(declareProperty<Real>("dkappa_dh")),
     _dkappa_dq(declareProperty<Real>("dkappa_dq")),
     _dkappa_dph(declareProperty<Real>("dkappa_dph")),
     _dkappa_dpq(declareProperty<Real>("dkappa_dpq")),
@@ -82,9 +82,15 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
     _dkappa_dp2(declareProperty<Real>("dkappa_dp2")),
     _dkappa_dh2(declareProperty<Real>("dkappa_dh2")),
     _dkappa_dq2(declareProperty<Real>("dkappa_dq2")),
-    _domega_dh(declareProperty<Real>("domega_dh")),
     _domega_dp(declareProperty<Real>("domega_dp")),
+    _domega_dh(declareProperty<Real>("domega_dh")),
     _domega_dq(declareProperty<Real>("domega_dq")),
+    _domega_dph(declareProperty<Real>("domega_dph")),
+    _domega_dpq(declareProperty<Real>("domega_dpq")),
+    _domega_dhq(declareProperty<Real>("domega_dhq")),
+    _domega_dp2(declareProperty<Real>("domega_dp2")),
+    _domega_dh2(declareProperty<Real>("domega_dh2")),
+    _domega_dq2(declareProperty<Real>("domega_dq2")),
     _h(coupledValue("enthalpy")),
     _grad_flow(coupledGradient("flowrate")),
     _grad_h(coupledGradient("enthalpy")),
@@ -181,7 +187,7 @@ MoskitoFluidWell_2p1c::gamma(const Real & h, const Real & p, const Real & q)
 
     gamma  = vfrac / (1.0 - vfrac);
     gamma *= rho_g * rho_l * rho_m / (rho_pam * rho_pam);
-    gamma *= std::pow((c0 - 1.0) * q / _area[_qp] + u_d , 2.0);
+    gamma *= std::pow((c0 - 1.0) * q / _area[_qp] * _well_sign[_qp] + u_d , 2.0);
   }
 
   return gamma;
@@ -210,7 +216,7 @@ MoskitoFluidWell_2p1c::kappa(const Real & h, const Real & p, const Real & q)
     eos_uo.h_lat(p, dummy, h_l, h_g);
 
     kappa  = vfrac * rho_g * rho_l / rho_pam * (h_g - h_l);
-    kappa *= std::pow((c0 - 1.0) * q / _area[_qp] + u_d , 2.0);
+    kappa *= (c0 - 1.0) * q / _area[_qp] * _well_sign[_qp] + u_d;
   }
 
   return kappa;
@@ -237,11 +243,13 @@ MoskitoFluidWell_2p1c::omega(const Real & h, const Real & p, const Real & q)
 
     rho_pam = rho_g * c0  * vfrac + (1.0 - vfrac * c0) * rho_l;
 
-    u_g  = (c0 * rho_m * q / _area[_qp] + rho_l * u_d) / rho_pam;
-    u_l  = (1.0 - vfrac * c0) * rho_m * q / _area[_qp] - rho_g * vfrac * u_d;
+    Real sq = q / _area[_qp] * _well_sign[_qp];
+
+    u_g  = (c0 * rho_m * sq + rho_l * u_d) / rho_pam;
+    u_l  = (1.0 - vfrac * c0) * rho_m * sq - rho_g * vfrac * u_d;
     u_l /= (1.0 - vfrac) * rho_pam;
 
-    omega -= 3.0 * u_g * u_l * q / _area[_qp];
+    omega -= 3.0 * u_g * u_l * sq;
     omega += std::pow(u_g,3.0) * (1.0 + rho_g * vfrac /rho_m);
     omega += std::pow(u_l,3.0) * (1.0 + rho_l * (1.0 - vfrac) / rho_m);
     omega *= 0.5 * vfrac * (1.0 - vfrac) * rho_g * rho_l / rho_m;
@@ -253,9 +261,9 @@ MoskitoFluidWell_2p1c::omega(const Real & h, const Real & p, const Real & q)
 void
 MoskitoFluidWell_2p1c::GammaDerivatives()
 {
-  _dgamma_dh[_qp]  = 0.0; _dgamma_dp[_qp]  = 0.0; _dgamma_dq[_qp]  = 0.0;
-  _dgamma_dpq[_qp] = 0.0; _dgamma_dhq[_qp] = 0.0; _dgamma_dph[_qp] = 0.0;
-  _dgamma_dh2[_qp] = 0.0; _dgamma_dp2[_qp] = 0.0; _dgamma_dq2[_qp] = 0.0;
+  _dgamma_dp[_qp]  = 0.0; _dgamma_dh[_qp]  = 0.0; _dgamma_dq[_qp]  = 0.0;
+  _dgamma_dph[_qp] = 0.0; _dgamma_dpq[_qp] = 0.0; _dgamma_dhq[_qp] = 0.0;
+  _dgamma_dp2[_qp] = 0.0; _dgamma_dh2[_qp] = 0.0; _dgamma_dq2[_qp] = 0.0;
 
   if (_phase[_qp] == 2.0)
   {
@@ -328,7 +336,9 @@ MoskitoFluidWell_2p1c::GammaDerivatives()
 void
 MoskitoFluidWell_2p1c::KappaDerivatives()
 {
-  _dkappa_dh[_qp] = 0.0; _dkappa_dp[_qp] = 0.0; _dkappa_dq[_qp] = 0.0;
+  _dkappa_dp[_qp] = 0.0; _dkappa_dh[_qp] = 0.0; _dkappa_dq[_qp] = 0.0;
+  _dkappa_dph[_qp] = 0.0; _dkappa_dpq[_qp] = 0.0; _dkappa_dhq[_qp] = 0.0;
+  _dkappa_dp2[_qp] = 0.0; _dkappa_dh2[_qp] = 0.0; _dkappa_dq2[_qp] = 0.0;
 
   if (_phase[_qp] == 2.0)
   {
@@ -353,6 +363,7 @@ MoskitoFluidWell_2p1c::KappaDerivatives()
     _dkappa_dq[_qp]  = kappa(_h[_qp], _P[_qp], _flow[_qp] + dq) - kappa(_h[_qp], _P[_qp], _flow[_qp] - dq);
     _dkappa_dq[_qp] /= 2.0 * dq;
     }
+
     if (dp * dh != 0.0)
     {
     _dkappa_dph[_qp]  = kappa(_h[_qp] + dh, _P[_qp] + dp, _flow[_qp]) + kappa(_h[_qp] - dh, _P[_qp] - dp, _flow[_qp]);
@@ -398,7 +409,9 @@ MoskitoFluidWell_2p1c::KappaDerivatives()
 void
 MoskitoFluidWell_2p1c::OmegaDerivatives()
 {
-  _domega_dh[_qp] = 0.0; _domega_dp[_qp] = 0.0; _domega_dq[_qp] = 0.0;
+  _domega_dp[_qp] = 0.0; _domega_dh[_qp] = 0.0; _domega_dq[_qp] = 0.0;
+  _domega_dph[_qp] = 0.0; _domega_dpq[_qp] = 0.0; _domega_dhq[_qp] = 0.0;
+  _domega_dp2[_qp] = 0.0; _domega_dh2[_qp] = 0.0; _domega_dq2[_qp] = 0.0;
 
   if (_phase[_qp] == 2.0)
   {
@@ -423,5 +436,46 @@ MoskitoFluidWell_2p1c::OmegaDerivatives()
     _domega_dq[_qp]  = omega(_h[_qp], _P[_qp], _flow[_qp] + dq) - omega(_h[_qp], _P[_qp], _flow[_qp] - dq);
     _domega_dq[_qp] /= 2.0 * dq;
     }
+
+    if (dp * dh != 0.0)
+    {
+    _domega_dph[_qp]  = omega(_h[_qp] + dh, _P[_qp] + dp, _flow[_qp]) + omega(_h[_qp] - dh, _P[_qp] - dp, _flow[_qp]);
+    _domega_dph[_qp] -= omega(_h[_qp] + dh, _P[_qp] - dp, _flow[_qp]) + omega(_h[_qp] - dh, _P[_qp] + dp, _flow[_qp]);
+    _domega_dph[_qp] /= 4.0 * dh * dp;
+    }
+
+    if (dh * dq != 0.0)
+    {
+    _domega_dhq[_qp]  = omega(_h[_qp] + dh, _P[_qp], _flow[_qp] + dq) + omega(_h[_qp] - dh, _P[_qp], _flow[_qp] - dq);
+    _domega_dhq[_qp] -= omega(_h[_qp] + dh, _P[_qp], _flow[_qp] - dq) + omega(_h[_qp] - dh, _P[_qp], _flow[_qp] + dq);
+    _domega_dhq[_qp] /= 4.0 * dh * dq;
+    }
+
+    if (dp * dq != 0.0)
+    {
+    _domega_dpq[_qp]  = omega(_h[_qp], _P[_qp] + dp, _flow[_qp] + dq) + omega(_h[_qp], _P[_qp] - dp, _flow[_qp] - dq);
+    _domega_dpq[_qp] -= omega(_h[_qp], _P[_qp] + dp, _flow[_qp] - dq) + omega(_h[_qp], _P[_qp] - dp, _flow[_qp] + dq);
+    _domega_dpq[_qp] /= 4.0 * dp * dq;
+    }
+
+    if (dp != 0.0)
+    {
+    _domega_dp2[_qp]  = omega(_h[_qp], _P[_qp] + dp, _flow[_qp]) + omega(_h[_qp], _P[_qp] - dp, _flow[_qp]);
+    _domega_dp2[_qp] -= 2.0 * omega(_h[_qp], _P[_qp], _flow[_qp]);
+    _domega_dp2[_qp] /=  dp * dp;
+    }
+    if (dh != 0.0)
+    {
+    _domega_dh2[_qp]  = omega(_h[_qp] + dh, _P[_qp], _flow[_qp]) + omega(_h[_qp] - dh, _P[_qp], _flow[_qp]);
+    _domega_dh2[_qp] -= 2.0 * omega(_h[_qp], _P[_qp], _flow[_qp]);
+    _domega_dh2[_qp] /=  dh * dh;
+    }
+    if (dq != 0.0)
+    {
+    _domega_dq2[_qp]  = omega(_h[_qp], _P[_qp], _flow[_qp] + dq) + omega(_h[_qp], _P[_qp], _flow[_qp] - dq);
+    _domega_dq2[_qp] -= 2.0 * omega(_h[_qp], _P[_qp], _flow[_qp]);
+    _domega_dq2[_qp] /=  dq * dq;
+    }
+
   }
 }

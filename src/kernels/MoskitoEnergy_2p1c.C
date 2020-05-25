@@ -57,8 +57,8 @@ MoskitoEnergy_2p1c::MoskitoEnergy_2p1c(const InputParameters & parameters)
   _drho_dh_2(getMaterialProperty<Real>("drho_dh_2")),
   _drho_dph(getMaterialProperty<Real>("drho_dph")),
   _gravity(getMaterialProperty<RealVectorValue>("gravity")),
-  _dkappa_dh(getMaterialProperty<Real>("dkappa_dh")),
   _dkappa_dp(getMaterialProperty<Real>("dkappa_dp")),
+  _dkappa_dh(getMaterialProperty<Real>("dkappa_dh")),
   _dkappa_dq(getMaterialProperty<Real>("dkappa_dq")),
   _dkappa_dph(getMaterialProperty<Real>("dkappa_dph")),
   _dkappa_dpq(getMaterialProperty<Real>("dkappa_dpq")),
@@ -66,9 +66,15 @@ MoskitoEnergy_2p1c::MoskitoEnergy_2p1c(const InputParameters & parameters)
   _dkappa_dp2(getMaterialProperty<Real>("dkappa_dp2")),
   _dkappa_dh2(getMaterialProperty<Real>("dkappa_dh2")),
   _dkappa_dq2(getMaterialProperty<Real>("dkappa_dq2")),
-  _domega_dh(getMaterialProperty<Real>("domega_dh")),
   _domega_dp(getMaterialProperty<Real>("domega_dp")),
-  _domega_dq(getMaterialProperty<Real>("domega_dq"))
+  _domega_dh(getMaterialProperty<Real>("domega_dh")),
+  _domega_dq(getMaterialProperty<Real>("domega_dq")),
+  _domega_dph(getMaterialProperty<Real>("domega_dph")),
+  _domega_dpq(getMaterialProperty<Real>("domega_dpq")),
+  _domega_dhq(getMaterialProperty<Real>("domega_dhq")),
+  _domega_dp2(getMaterialProperty<Real>("domega_dp2")),
+  _domega_dh2(getMaterialProperty<Real>("domega_dh2")),
+  _domega_dq2(getMaterialProperty<Real>("domega_dq2"))
 {
 }
 
@@ -78,6 +84,12 @@ MoskitoEnergy_2p1c::computeQpResidual()
   // r += _grad_test[_i][_qp] * _lambda[_qp] * _grad_u[_qp] / _cp[_qp];
 
   RealVectorValue r = 0.0;
+
+  // r += _drho_dp[_qp] * _grad_p[_qp] + _drho_dh[_qp] * _grad_u[_qp];
+  // r *= _q[_qp] * (_u[_qp] + _q[_qp] * _q[_qp] / 2.0 / _area[_qp] / _area[_qp]);
+  // r += _grad_q[_qp] * _rho[_qp] * (_u[_qp] + 1.5 * _q[_qp] * _q[_qp] / _area[_qp] / _area[_qp]);
+  // r += _rho[_qp] * _q[_qp] * (_grad_u[_qp] - _gravity[_qp]);
+  // r *= _well_sign[_qp] / _area[_qp];
 
   r += (_drho_dp[_qp] * _grad_p[_qp] + _drho_dh[_qp] * _grad_u[_qp]) * _q[_qp] * _u[_qp];
   r += _grad_q[_qp] * _rho[_qp] * _u[_qp];
