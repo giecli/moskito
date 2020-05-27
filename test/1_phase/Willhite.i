@@ -44,7 +44,7 @@
     # outputs = exodus
   [../]
   [./Lateral]
-    type = MoskitoLatHeat_1p
+    type = MoskitoLatHeat
      temperature = T
      # Geometry of the well. As the example did not contain any tubing radius, which is required for teh material it was artificially set to a small radius
      well_diameter_vector = '0.0890016 0.089001602 0.216408 0.24384 0.3048'
@@ -108,7 +108,7 @@
     variable = q
   [../]
   [./heat]
-    type = MoskitoLateralHeat_1p
+    type = MoskitoLateralHeat_1p_3d
     variable = T
   [../]
 []

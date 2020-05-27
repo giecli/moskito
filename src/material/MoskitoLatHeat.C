@@ -21,14 +21,14 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoLatHeat_1p.h"
+#include "MoskitoLatHeat.h"
 #include "Conversion.h"
 
-registerMooseObject("MoskitoApp", MoskitoLatHeat_1p);
+registerMooseObject("MoskitoApp", MoskitoLatHeat);
 
 template <>
 InputParameters
-validParams<MoskitoLatHeat_1p>()
+validParams<MoskitoLatHeat>()
 {
     InputParameters params = validParams<Material>();
     params += validParams<NewtonIteration>();
@@ -82,7 +82,7 @@ validParams<MoskitoLatHeat_1p>()
     return params;
 }
 
-MoskitoLatHeat_1p::MoskitoLatHeat_1p(const InputParameters & parameters)
+MoskitoLatHeat::MoskitoLatHeat(const InputParameters & parameters)
   : Material(parameters),
     NewtonIteration(parameters),
     _T(coupledValue("temperature")),
@@ -116,7 +116,7 @@ Timing = (parameters.isParamSetByUser("user_defined_time")) ? getParam<Real>("us
 
 // Compute dimensionless time (ft)
 Real
-MoskitoLatHeat_1p::transienttimefunction(Real Uto)
+MoskitoLatHeat::transienttimefunction(Real Uto)
 {
 
   switch (_Dim_time)
@@ -234,7 +234,7 @@ MoskitoLatHeat_1p::transienttimefunction(Real Uto)
 }
 
 Real
-MoskitoLatHeat_1p::TemperatureFormation()
+MoskitoLatHeat::TemperatureFormation()
 {
   Real Trock = _gradT.value(_t, _q_point[_qp]);
   _TRock[_qp] = Trock;
@@ -243,7 +243,7 @@ MoskitoLatHeat_1p::TemperatureFormation()
 }
 
 Real
-MoskitoLatHeat_1p::TemperatureWBinterface(Real Uto, Real Temp)
+MoskitoLatHeat::TemperatureWBinterface(Real Uto, Real Temp)
 {
   Real Twb = 0.0;
   Twb += (_well_assembly[1] / 2.0) * Uto * transienttimefunction(Uto) * Temp;
@@ -254,7 +254,7 @@ MoskitoLatHeat_1p::TemperatureWBinterface(Real Uto, Real Temp)
 }
 
 Real
-MoskitoLatHeat_1p::TemperatureCasingAnnulusInterface(Real Uto, Real Temp)
+MoskitoLatHeat::TemperatureCasingAnnulusInterface(Real Uto, Real Temp)
 {
   Real Tci = 0.0;
 
@@ -273,7 +273,7 @@ MoskitoLatHeat_1p::TemperatureCasingAnnulusInterface(Real Uto, Real Temp)
 }
 
 Real
-MoskitoLatHeat_1p::TemperatureTubingOuter(Real Uto, Real Temp)
+MoskitoLatHeat::TemperatureTubingOuter(Real Uto, Real Temp)
 {
   Real Tto;
   Tto = std::log(_well_assembly[1] / _well_assembly[0]) / _conductivity_vector[0];
@@ -284,7 +284,7 @@ MoskitoLatHeat_1p::TemperatureTubingOuter(Real Uto, Real Temp)
 }
 
 Real
-MoskitoLatHeat_1p::RadialHeatTransferCoefficient(Real Uto, Real Temp)
+MoskitoLatHeat::RadialHeatTransferCoefficient(Real Uto, Real Temp)
 {
   Real OverFtci = 0.0;
   OverFtci += 1.0 / _Annulus_eao - 1.0;
@@ -300,7 +300,7 @@ MoskitoLatHeat_1p::RadialHeatTransferCoefficient(Real Uto, Real Temp)
 }
 
 Real
-MoskitoLatHeat_1p::ConvectiveHeatTransferCoefficient(Real Uto, Real Temp, Real grav)
+MoskitoLatHeat::ConvectiveHeatTransferCoefficient(Real Uto, Real Temp, Real grav)
 {
   Real khc, hc;
   // Calculate Prandtl number
@@ -342,7 +342,7 @@ MoskitoLatHeat_1p::ConvectiveHeatTransferCoefficient(Real Uto, Real Temp, Real g
 }
 
 Real
-MoskitoLatHeat_1p::Grashof(Real Uto, Real Temp, Real grav)
+MoskitoLatHeat::Grashof(Real Uto, Real Temp, Real grav)
 {
   Real Gr;
 
@@ -356,7 +356,7 @@ MoskitoLatHeat_1p::Grashof(Real Uto, Real Temp, Real grav)
 }
 
 Real
-MoskitoLatHeat_1p::Rayleigh(Real grav, Real Uto, Real Temp)
+MoskitoLatHeat::Rayleigh(Real grav, Real Uto, Real Temp)
 {
   Real Lc, Ray;
   Lc = 2 * std::pow(std::log(_rao / _rai),4.0 / 3.0);
@@ -369,13 +369,13 @@ MoskitoLatHeat_1p::Rayleigh(Real grav, Real Uto, Real Temp)
 }
 
 Real
-MoskitoLatHeat_1p::computeReferenceResidual(const Real trail_value, const Real scalar)
+MoskitoLatHeat::computeReferenceResidual(const Real trail_value, const Real scalar)
 {
   return 1e-2;
 }
 
 Real
-MoskitoLatHeat_1p::computeResidual(const Real trail_value, const Real scalar)
+MoskitoLatHeat::computeResidual(const Real trail_value, const Real scalar)
 {
   // Auxillary variable
   Real Aux, Uto;
@@ -407,7 +407,7 @@ MoskitoLatHeat_1p::computeResidual(const Real trail_value, const Real scalar)
 }
 
 Real
-MoskitoLatHeat_1p::computeDerivative(const Real trail_value, const Real scalar)
+MoskitoLatHeat::computeDerivative(const Real trail_value, const Real scalar)
 {
   Real Uto_plus_tol, Uto_minus_tol, tol_Uto;
   // Derivation concept according to MoskitoEOS2P userobject
@@ -419,7 +419,7 @@ MoskitoLatHeat_1p::computeDerivative(const Real trail_value, const Real scalar)
 }
 
 void
-MoskitoLatHeat_1p::computeQpProperties()
+MoskitoLatHeat::computeQpProperties()
 {
   if (_diameter[_qp] != _well_assembly[0])
     mooseError("Diameter of material and first entry of diameter vector must matach.\n");
@@ -458,7 +458,7 @@ MoskitoLatHeat_1p::computeQpProperties()
 }
 
 Real
-MoskitoLatHeat_1p::initialGuess(const Real trial_value)
+MoskitoLatHeat::initialGuess(const Real trial_value)
 {
   Real ini_guess;
   if (trial_value == 0.0)

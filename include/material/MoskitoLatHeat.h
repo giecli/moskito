@@ -27,15 +27,15 @@
 #include "Function.h"
 #include "NewtonIteration.h"
 
-class MoskitoLatHeat_1p;
+class MoskitoLatHeat;
 
 template <>
-InputParameters validParams<MoskitoLatHeat_1p>();
+InputParameters validParams<MoskitoLatHeat>();
 
-class MoskitoLatHeat_1p : public Material, public NewtonIteration
+class MoskitoLatHeat : public Material, public NewtonIteration
 {
 public:
-  MoskitoLatHeat_1p(const InputParameters & parameters);
+  MoskitoLatHeat(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
   virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;

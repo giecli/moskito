@@ -45,7 +45,7 @@
     output_properties = 'temperature density well_velocity specific_heat well_reynolds_no well_moody_friction viscosity diameter'
   [../]
   [./Lateral]
-    type = MoskitoLatHeat_1p
+    type =  MoskitoLatHeat
      temperature = T
      well_diameter_vector = '0.3 0.300000000001 0.300000000002'
      conductivities_vector = '40.0 0.0'
@@ -120,7 +120,7 @@
     flowrate = q
   [../]
   [./heat]
-    type = MoskitoLateralHeat_1p
+    type = MoskitoLateralHeat_1p_3d
     variable = T
   [../]
 []
