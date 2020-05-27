@@ -142,7 +142,8 @@ MoskitoEnergy_2p1c::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (jvar == _p_var_number)
   {
-    j += _drho_dp_2[_qp] * _grad_p[_qp] + _drho_dp[_qp] * _grad_phi[_j][_qp] + _drho_dph[_qp] * _grad_u[_qp];
+    j += (_drho_dp_2[_qp] * _grad_p[_qp] + _drho_dph[_qp] * _grad_u[_qp]) *  _phi[_j][_qp];
+    j += _drho_dp[_qp] * _grad_phi[_j][_qp];
     j *= _q[_qp] * (_u[_qp] + _q[_qp] * _q[_qp] / 2.0 / _area[_qp] / _area[_qp]);
     j += _grad_q[_qp] * _drho_dp[_qp] * _phi[_j][_qp] * (_u[_qp] + 1.5 * _q[_qp] * _q[_qp] / _area[_qp] / _area[_qp]);
     j += _drho_dp[_qp] * _phi[_j][_qp] * _q[_qp] * (_grad_u[_qp] - _gravity[_qp]);
