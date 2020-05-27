@@ -25,15 +25,15 @@
 
 #include "Kernel.h"
 
-class MoskitoLateralHeat_1p;
+class MoskitoLateralHeat_1p_3d;
 
 template <>
-InputParameters validParams<MoskitoLateralHeat_1p>();
+InputParameters validParams<MoskitoLateralHeat_1p_3d>();
 
-class MoskitoLateralHeat_1p : public Kernel
+class MoskitoLateralHeat_1p_3d : public Kernel
 {
 public:
-  MoskitoLateralHeat_1p(const InputParameters & parameters);
+  MoskitoLateralHeat_1p_3d(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

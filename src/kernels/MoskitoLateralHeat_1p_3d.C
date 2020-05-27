@@ -21,13 +21,13 @@
 /*  along with this program.  If not, see <http://www.gnu.org/licenses/>  */
 /**************************************************************************/
 
-#include "MoskitoLateralHeat_1p.h"
+#include "MoskitoLateralHeat_1p_3d.h"
 
-registerMooseObject("MoskitoApp", MoskitoLateralHeat_1p);
+registerMooseObject("MoskitoApp", MoskitoLateralHeat_1p_3d);
 
 template <>
 InputParameters
-validParams<MoskitoLateralHeat_1p>()
+validParams<MoskitoLateralHeat_1p_3d>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Lateral heat exchange between wellbore "
@@ -36,7 +36,7 @@ validParams<MoskitoLateralHeat_1p>()
   return params;
 }
 
-MoskitoLateralHeat_1p::MoskitoLateralHeat_1p(const InputParameters & parameters)
+MoskitoLateralHeat_1p_3d::MoskitoLateralHeat_1p_3d(const InputParameters & parameters)
   : Kernel(parameters),
   _rto(getMaterialProperty<Real>("radius_tubbing_outer")),
   _Uto(getMaterialProperty<Real>("thermal_resistivity_well")),
@@ -46,7 +46,7 @@ MoskitoLateralHeat_1p::MoskitoLateralHeat_1p(const InputParameters & parameters)
   }
 
 Real
-MoskitoLateralHeat_1p::computeQpResidual()
+MoskitoLateralHeat_1p_3d::computeQpResidual()
 {
   Real r = 0.0;
   r =  2.0 * PI * _rto[_qp] * _Uto[_qp] * (_u[_qp] - _Twb[_qp]);
@@ -56,7 +56,7 @@ MoskitoLateralHeat_1p::computeQpResidual()
 }
 
 Real
-MoskitoLateralHeat_1p::computeQpJacobian()
+MoskitoLateralHeat_1p_3d::computeQpJacobian()
 {
   Real j = 0.0;
   j =  2.0 * PI * _rto[_qp] * _Uto[_qp] * _phi[_j][_qp];
