@@ -7,9 +7,19 @@
   nx = 50
 []
 
+[Modules]
+  [./FluidProperties]
+    [./water_uo]
+      type = Water97FluidProperties
+      execute_on = TIMESTEP_BEGIN
+    [../]
+  [../]
+[]
+
 [UserObjects]
   [./eos]
-    type = MoskitoEOS1P_IdealFluid
+    type = MoskitoEOS1P_FPModule
+    SinglePhase_fp = water_uo
   [../]
   [./viscosity]
     type = MoskitoViscosityWaterSmith
