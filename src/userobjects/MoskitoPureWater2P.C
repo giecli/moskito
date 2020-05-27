@@ -42,7 +42,7 @@ MoskitoPureWater2P::MoskitoPureWater2P(const InputParameters & parameters)
     InputParameters params = _app.getFactory().getValidParams(class_name);
     _fe_problem.addUserObject(class_name, eos_name, params);
   }
-  _eos_lg = &_fe_problem.getUserObjectTempl<MoskitoWater97FluidProperties>(eos_name);
+  _eos_lg = &_fe_problem.getUserObject<MoskitoWater97FluidProperties>(eos_name);
 }
 
 void
