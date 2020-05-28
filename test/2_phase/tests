@@ -19,9 +19,9 @@
     input = 'transient_liquid.i'
     exodiff = 'transient_liquid_out.e'
   [../]
-  [./All_Kernel_Check_1p_gas]
+  [./All_Kernel_Check_2p_nonboiling]
     type = 'Exodiff'
-    input = 'transient_gas.i'
-    exodiff = 'transient_gas_out.e'
+    input = 'transient_2p.i'
+    exodiff = 'transient_2p_out.e'
   [../]
 []
