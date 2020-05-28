@@ -45,18 +45,16 @@
     roughness_type = smooth
     gravity = '10 0 0'
     outputs = exodus
-    output_properties = 'void_fraction temperature'
+    output_properties = 'temperature void_fraction'
   [../]
 []
 
 [Variables]
   [./p]
-    initial_condition = 2e6
-    # scaling = 1e-3
+    initial_condition = 1e5
   [../]
   [./h]
-    initial_condition = 2e5
-    # scaling = 1e-5
+    initial_condition = 3e6
   [../]
   [./q]
   [../]
@@ -67,7 +65,7 @@
     type = DirichletBC
     variable = p
     boundary = left
-    value = '2e6'
+    value = 1e5
   [../]
   [./qbc]
     type = FunctionDirichletBC
@@ -79,7 +77,7 @@
     type = DirichletBC
     variable = h
     boundary = right
-    value = 5.3e5
+    value = 3e6
   [../]
 []
 
@@ -137,20 +135,6 @@
   [../]
 []
 
-[Dampers]
-  # [./test]
-  #   type = MaxIncrement
-  #   variable = h
-  #   max_increment = 0.1
-  #   increment_type = fractional
-  # [../]
-  # [./test]
-  #   type = BoundingValueNodalDamper
-  #   variable = p
-  #   min_value = 1e4
-  # [../]
-[]
-
 [Executioner]
   type = Transient
   dt = 1
@@ -158,6 +142,7 @@
   l_max_its = 50
   nl_max_its = 50
   l_tol = 1e-8
+  nl_abs_tol = 1e-5
   nl_rel_tol = 1e-8
   solve_type = NEWTON
   automatic_scaling = true
