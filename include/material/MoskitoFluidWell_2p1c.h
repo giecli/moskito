@@ -95,31 +95,61 @@ protected:
   MaterialProperty<Real> & _flow_pat;
 
   // The gamma first derivatives
-  MaterialProperty<Real> & _dgamma_dh;
-  // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dp;
+  // The gamma first derivatives
+  MaterialProperty<Real> & _dgamma_dh;
   // The gamma first derivatives
   MaterialProperty<Real> & _dgamma_dq;
   // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma2_dhq;
+  MaterialProperty<Real> & _dgamma_dph;
   // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma2_dpq;
+  MaterialProperty<Real> & _dgamma_dpq;
   // The gamma second derivatives
-  MaterialProperty<Real> & _dgamma2_dq2;
+  MaterialProperty<Real> & _dgamma_dhq;
+  // The gamma second derivatives
+  MaterialProperty<Real> & _dgamma_dp2;
+  // The gamma second derivatives
+  MaterialProperty<Real> & _dgamma_dh2;
+  // The gamma second derivatives
+  MaterialProperty<Real> & _dgamma_dq2;
 
-  // The kappa first derivatives
-  MaterialProperty<Real> & _dkappa_dh;
   // The kappa first derivatives
   MaterialProperty<Real> & _dkappa_dp;
   // The kappa first derivatives
+  MaterialProperty<Real> & _dkappa_dh;
+  // The kappa first derivatives
   MaterialProperty<Real> & _dkappa_dq;
+  // The kappa second derivatives
+  MaterialProperty<Real> & _dkappa_dph;
+  // The kappa second derivatives
+  MaterialProperty<Real> & _dkappa_dpq;
+  // The kappa second derivatives
+  MaterialProperty<Real> & _dkappa_dhq;
+  // The kappa second derivatives
+  MaterialProperty<Real> & _dkappa_dp2;
+  // The kappa second derivatives
+  MaterialProperty<Real> & _dkappa_dh2;
+  // The kappa second derivatives
+  MaterialProperty<Real> & _dkappa_dq2;
 
-  // The omega first derivatives
-  MaterialProperty<Real> & _domega_dh;
   // The omega first derivatives
   MaterialProperty<Real> & _domega_dp;
   // The omega first derivatives
+  MaterialProperty<Real> & _domega_dh;
+  // The omega first derivatives
   MaterialProperty<Real> & _domega_dq;
+  // The omega second derivatives
+  MaterialProperty<Real> & _domega_dph;
+  // The omega second derivatives
+  MaterialProperty<Real> & _domega_dpq;
+  // The omega second derivatives
+  MaterialProperty<Real> & _domega_dhq;
+  // The omega second derivatives
+  MaterialProperty<Real> & _domega_dp2;
+  // The omega second derivatives
+  MaterialProperty<Real> & _domega_dh2;
+  // The omega second derivatives
+  MaterialProperty<Real> & _domega_dq2;
 
   // The coupled enthalpy
   const VariableValue & _h;

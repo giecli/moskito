@@ -1,4 +1,3 @@
-
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -7,64 +6,63 @@
   nx = 50
 []
 
-[Modules]
-  [./FluidProperties]
-    [./water_uo]
-      type = Water97FluidProperties
-      execute_on = TIMESTEP_BEGIN
-    [../]
-  [../]
-[]
-
 [UserObjects]
-  [./eos]
-    type = MoskitoEOS1P_FPModule
-    SinglePhase_fp = water_uo
+  [./viscosity_gas]
+    type = MoskitoViscosityConst
+    viscosity = 0.0001
   [../]
-  [./viscosity]
+  [./viscosity_liqid]
     type = MoskitoViscosityWaterSmith
+  [../]
+  [./viscosity_2p]
+    type = MoskitoViscosity2P
+    ve_uo_gas = viscosity_gas
+    ve_uo_liquid = viscosity_liqid
+  [../]
+  [./df]
+    type = MoskitoDFShi
+    surface_tension = 0.0288
+    Pan_param_cMax = 1.2
+    Shi_param_Fv = 0.3
+  [../]
+  [./eos]
+    type = MoskitoPureWater2P
   [../]
 []
 
 [Materials]
-  [./area0]
-    type = MoskitoFluidWell_1p1c
+  [./area]
+    type = MoskitoFluidWell_2p1c
     pressure = p
-    temperature = T
+    enthalpy = h
     flowrate = q
     well_type = production
     well_direction = x
     well_diameter = 0.0890016
     eos_uo = eos
-    viscosity_uo = viscosity
+    viscosity_uo = viscosity_2p
+    drift_flux_uo = df
     roughness_type = smooth
-    gravity = '10.0 0 0'
-    output_properties = 'density well_velocity'
+    gravity = '10 0 0'
     outputs = exodus
+    output_properties = 'void_fraction temperature'
   [../]
 []
 
 [Variables]
-  [./T]
-    initial_condition = 320
-  [../]
   [./p]
-    [./InitialCondition]
-      type = FunctionIC
-      function = '2e6'
-    [../]
+    initial_condition = 2e6
+    # scaling = 1e-3
+  [../]
+  [./h]
+    initial_condition = 2e5
+    # scaling = 1e-5
   [../]
   [./q]
   [../]
 []
 
 [BCs]
-  [./Tbc_top]
-    type = DirichletBC
-    variable = T
-    boundary = right
-    value = 400
-  [../]
   [./pbc]
     type = DirichletBC
     variable = p
@@ -77,43 +75,49 @@
     boundary = left
     function = 'if(t>20,0.01,0.00001)'
   [../]
-[../]
+  [./hbc]
+    type = DirichletBC
+    variable = h
+    boundary = right
+    value = 5.3e5
+  [../]
+[]
 
 [Kernels]
-  [./Tkernel]
-    type = MoskitoEnergy_1p1c
-    variable = T
+  [./hkernel]
+    type = MoskitoEnergy_2p1c
+    variable = h
     pressure = p
     flowrate = q
   [../]
-  [./Ttimekernel]
-    type = MoskitoTimeEnergy_1p1c
-    variable = T
+  [./htimekernel]
+    type = MoskitoTimeEnergy_2p1c
+    variable = h
     pressure = p
     flowrate = q
   [../]
   [./pkernel]
-    type = MoskitoMass_1p1c
+    type = MoskitoMass_2p1c
     variable = p
     flowrate = q
-    temperature = T
+    enthalpy = h
   [../]
   [./ptimekernel]
-    type = MoskitoTimeMass_1p1c
+    type = MoskitoTimeMass_2p1c
     variable = p
-    temperature = T
+    enthalpy = h
   [../]
   [./qkernel]
-    type = MoskitoMomentum_1p1c
+    type = MoskitoMomentum_2p1c
     variable = q
     pressure = p
-    temperature = T
+    enthalpy = h
   [../]
   [./qtimekernel]
-    type = MoskitoTimeMomentum_1p1c
+    type = MoskitoTimeMomentum_2p1c
     variable = q
     pressure = p
-    temperature = T
+    enthalpy = h
   [../]
 []
 
@@ -133,6 +137,20 @@
   [../]
 []
 
+[Dampers]
+  # [./test]
+  #   type = MaxIncrement
+  #   variable = h
+  #   max_increment = 0.1
+  #   increment_type = fractional
+  # [../]
+  # [./test]
+  #   type = BoundingValueNodalDamper
+  #   variable = p
+  #   min_value = 1e4
+  # [../]
+[]
+
 [Executioner]
   type = Transient
   dt = 1
@@ -143,6 +161,7 @@
   nl_rel_tol = 1e-8
   solve_type = NEWTON
   automatic_scaling = true
+  compute_scaling_once = false
 []
 
 [Outputs]
