@@ -14,4 +14,9 @@
     input = 'Shi_DFM.i'
     exodiff = 'Shi_DFM_out.e'
   [../]
+  [./All_Kernel_Check_1p_liquid]
+    type = 'Exodiff'
+    input = 'transient_liquid.i'
+    exodiff = 'transient_liquid_out.e'
+  [../]
 []
