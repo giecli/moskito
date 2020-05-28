@@ -54,7 +54,7 @@
     initial_condition = 1e5
   [../]
   [./h]
-    initial_condition = 3e6
+    initial_condition = 5e5
   [../]
   [./q]
   [../]
@@ -77,7 +77,7 @@
     type = DirichletBC
     variable = h
     boundary = right
-    value = 3e6
+    value = 7e5
   [../]
 []
 
@@ -119,26 +119,26 @@
   [../]
 []
 
-[Preconditioning]
-  active = pn1
-  [./p1]
-    type = SMP
-    full = true
-    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
-    petsc_options_value = ' bjacobi  ilu          NONZERO                 '
-  [../]
-  [./pn1]
-    type = SMP
-    full = true
-    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -snes_type -snes_linesearch_type'
-    petsc_options_value = ' bjacobi  ilu          NONZERO                   newtonls   basic               '
-  [../]
-[]
+# [Preconditioning]
+#   active = pn1
+#   [./p1]
+#     type = SMP
+#     full = true
+#     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
+#     petsc_options_value = ' bjacobi  ilu          NONZERO                 '
+#   [../]
+#   [./pn1]
+#     type = SMP
+#     full = true
+#     petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -snes_type -snes_linesearch_type'
+#     petsc_options_value = ' bjacobi  ilu          NONZERO                   newtonls   basic               '
+#   [../]
+# []
 
 [Executioner]
   type = Transient
-  dt = 1
-  end_time = 120
+  dt = 10
+  end_time = 80
   l_max_its = 50
   nl_max_its = 50
   l_tol = 1e-8
@@ -147,8 +147,10 @@
   solve_type = NEWTON
   automatic_scaling = true
   compute_scaling_once = false
+  auto_preconditioning = true
 []
 
 [Outputs]
   exodus = true
+
 []
