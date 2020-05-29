@@ -27,15 +27,15 @@
 #include "Function.h"
 #include "NewtonIteration.h"
 
-class MoskitoLatHeat;
+class MoskitoLatHeat_matrix;
 
 template <>
-InputParameters validParams<MoskitoLatHeat>();
+InputParameters validParams<MoskitoLatHeat_matrix>();
 
-class MoskitoLatHeat : public Material, public NewtonIteration
+class MoskitoLatHeat_matrix : public Material, public NewtonIteration
 {
 public:
-  MoskitoLatHeat(const InputParameters & parameters);
+  MoskitoLatHeat_matrix(const InputParameters & parameters);
   virtual void computeQpProperties() override;
 
   virtual Real computeReferenceResidual(const Real trail_value, const Real scalar) override;
@@ -94,8 +94,14 @@ protected:
   Real _Annulus_alpha;
   // Thermal conductivoty formation (earth)
   Real _Rock_lambda;
+  // Thermal conductivoty formation (earth) for export to Kernal
+  MaterialProperty<Real> & _Rock_conductivity;
   // Formation thermal diffusivity
   Real _Rock_alpha;
+  // Density of formation
+  Real _Rock_density;
+  // Specific heat capacity of fomration
+  Real _Rock_capacity;
   // Thermal wellbore resistivity
   MaterialProperty<Real> & _Uto;
   //  Temperature at wellbore formation interface
