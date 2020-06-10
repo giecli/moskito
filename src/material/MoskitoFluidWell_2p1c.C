@@ -30,6 +30,7 @@ InputParameters
 validParams<MoskitoFluidWell_2p1c>()
 {
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
+  params += validParams<NewtonIteration>();
   params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable (J/kg)");
   params.addRequiredParam<UserObjectName>("eos_uo",
         "The name of the userobject for 2 phase EOS");
@@ -42,6 +43,7 @@ validParams<MoskitoFluidWell_2p1c>()
 
 MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
   : MoskitoFluidWellGeneral(parameters),
+    NewtonIteration(parameters),
     eos_uo(getUserObject<MoskitoEOS2P>("eos_uo")),
     viscosity_uo(getUserObject<MoskitoViscosity2P>("viscosity_uo")),
     dfm_uo(getUserObject<MoskitoDriftFlux>("drift_flux_uo")),
@@ -98,6 +100,22 @@ MoskitoFluidWell_2p1c::MoskitoFluidWell_2p1c(const InputParameters & parameters)
 {
 }
 
+Real
+MoskitoFluidWell_2p1c::computeResidual(const Real trial_value, const Real scalar)
+{
+  Real rho;
+  rho = eos_uo.rho_m_from_p_h(scalar, _h[_qp]);
+  return rho - trial_value;
+}
+
+Real
+MoskitoFluidWell_2p1c::computeDerivative(const Real trial_value, const Real scalar)
+{
+  Real drho_dp, t1, t2;
+  eos_uo.rho_m_by_p(scalar, _h[_qp], t1, drho_dp, t2);
+  return drho_dp;
+}
+
 void
 MoskitoFluidWell_2p1c::computeQpProperties()
 {
@@ -112,6 +130,9 @@ MoskitoFluidWell_2p1c::computeQpProperties()
   _rho_g[_qp] = eos_uo.rho_g_from_p_T(_P[_qp], _T[_qp], _phase[_qp]);
   _vfrac[_qp]  = (_rho_m[_qp] - _rho_l[_qp]) / (_rho_g[_qp] - _rho_l[_qp]);
   _cp_m[_qp]  = eos_uo.cp_m_from_p_T(_P[_qp], _T[_qp], _vmfrac[_qp], _phase[_qp]);
+
+  Real press = 0.0;
+  returnNewtonSolve(_rho_m[_qp], press, _console);
 
   // To calculate the friction factor and Re No
   _u[_qp] = _flow[_qp] / _area[_qp];

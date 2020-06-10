@@ -27,13 +27,14 @@
 #include "MoskitoEOS2P.h"
 #include "MoskitoViscosity2P.h"
 #include "MoskitoDriftFlux.h"
+#include "NewtonIteration.h"
 
 class MoskitoFluidWell_2p1c;
 
 template <>
 InputParameters validParams<MoskitoFluidWell_2p1c>();
 
-class MoskitoFluidWell_2p1c : public MoskitoFluidWellGeneral
+class MoskitoFluidWell_2p1c : public MoskitoFluidWellGeneral, NewtonIteration
 {
 public:
   MoskitoFluidWell_2p1c(const InputParameters & parameters);
@@ -45,6 +46,14 @@ public:
   Real gamma(const Real & h, const Real & p, const Real & q);
   Real kappa(const Real & h, const Real & p, const Real & q);
   Real omega(const Real & h, const Real & p, const Real & q);
+  // from NewtonIteration class
+  virtual Real computeReferenceResidual(const Real trial_value, const Real scalar) override {return 1e-2;}
+  virtual Real computeResidual(const Real trial_value, const Real scalar) override;
+  virtual Real computeDerivative(const Real trial_value, const Real scalar) override;
+  virtual Real initialGuess(const Real trial_value) override {return 1e5;}
+  virtual Real minimumPermissibleValue(const Real trial_value) const override {return 1e-10;}
+
+
 
 protected:
   // Userobject to equation of state
