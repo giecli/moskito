@@ -58,8 +58,6 @@ protected:
   // Direction of flow, the positive sign is production and vice versa
   MaterialProperty<Real> & _well_sign;
 
-  // The coupled pressure
-  const VariableValue & _P;
   // The coupled flow rate
   const VariableValue & _flow;
 

@@ -31,6 +31,7 @@ validParams<MoskitoFluidWell_1p1c>()
 {
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
   params.addRequiredCoupledVar("temperature", "Temperature nonlinear variable (K)");
+  params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable (Pa)");
   params.addRequiredParam<UserObjectName>("eos_uo",
         "The name of the userobject for EOS");
   params.addRequiredParam<UserObjectName>("viscosity_uo",
@@ -48,6 +49,7 @@ MoskitoFluidWell_1p1c::MoskitoFluidWell_1p1c(const InputParameters & parameters)
     _drho_dp(declareProperty<Real>("drho_dp")),
     _drho_dT(declareProperty<Real>("drho_dT")),
     _h(declareProperty<Real>("h_from_p_T")),
+    _P(coupledValue("pressure")),
     _T(coupledValue("temperature"))
 {
 }

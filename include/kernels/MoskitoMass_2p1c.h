@@ -42,15 +42,10 @@ protected:
 
   // The coupled flow_rate
   const VariableValue & _q;
-
   // The gradient of the coupled flow_rate
   const VariableGradient & _grad_q;
-  // The gradient of the coupled specific enthalpy
-  const VariableGradient & _grad_h;
-
   // Variable numberings
   unsigned _q_var_number;
-  unsigned _h_var_number;
 
   // The area of pipe
   const MaterialProperty<Real> & _area;
@@ -58,16 +53,4 @@ protected:
   const MaterialProperty<RealVectorValue> & _well_dir;
   // The sign of well flow direction
   const MaterialProperty<Real> & _well_sign;
-  // The density
-  const MaterialProperty<Real> & _rho;
-  // The first derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp;
-  // The first derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The second derivative of density wrt enthalpy and pressure
-  const MaterialProperty<Real> & _drho_dph;
 };

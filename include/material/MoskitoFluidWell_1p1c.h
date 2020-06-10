@@ -55,6 +55,8 @@ protected:
   // Enthalpy from P and T
   MaterialProperty<Real> & _h;
 
+  // The coupled pressure
+  const VariableValue & _P;
   // The coupled temperature
   const VariableValue & _T;
 };

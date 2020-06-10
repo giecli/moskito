@@ -51,6 +51,20 @@
   [../]
 []
 
+[AuxVariables]
+  [./pressure_aux]
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./pressure_mat]
+    type = MaterialRealAux
+    property = 'density'
+    variable = pressure_aux
+  [../]
+[]
+
 [BCs]
   [./pbc]
     type = DirichletBC

@@ -41,27 +41,19 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  // The gradient of the coupled pressure
+  // The gradient of the coupled density
   const VariableGradient & _grad_p;
+  // The gradient of the coupled pressure
+  const VariableGradient & _grad_rho;
   // The gradient of the coupled specific enthalpy
   const VariableGradient & _grad_h;
+  // The coupled flow_rate
+  const VariableValue & _rho;
 
   // Variable numberings
-  unsigned _p_var_number;
+  unsigned _rho_var_number;
   unsigned _h_var_number;
 
-  // The mixture density
-  const MaterialProperty<Real> & _rho;
-  // The first derivative of mixture density wrt pressure
-  const MaterialProperty<Real> & _drho_dp;
-  // The first derivative of mixture density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh;
-  // The second derivative of density wrt pressure
-  const MaterialProperty<Real> & _drho_dp_2;
-  // The second derivative of density wrt enthalpy
-  const MaterialProperty<Real> & _drho_dh_2;
-  // The second derivative of density wrt enthalpy and pressure
-  const MaterialProperty<Real> & _drho_dph;
   // The pipe Moody friction factor
   const MaterialProperty<Real> & _f;
   // The gravity acceleration as a vector

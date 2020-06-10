@@ -29,7 +29,6 @@ validParams<MoskitoFluidWellGeneral>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredCoupledVar("pressure", "Pressure nonlinear variable (Pa)");
   params.addRequiredCoupledVar("flowrate", "Mixture flow rate nonlinear variable (m^3/s)");
   params.addParam<RealVectorValue>("gravity", RealVectorValue(0.0,0.0,0.0),
                                         "The gravity acceleration as a vector");
@@ -73,7 +72,6 @@ MoskitoFluidWellGeneral::MoskitoFluidWellGeneral(const InputParameters & paramet
     _gravity(declareProperty<RealVectorValue>("gravity")),
     _lambda(declareProperty<Real>("thermal_conductivity")),
     _well_sign(declareProperty<Real>("flow_direction_sign")),
-    _P(coupledValue("pressure")),
     _flow(coupledValue("flowrate")),
     _g(getParam<RealVectorValue>("gravity")),
     _lambda0(getParam<Real>("casing_thermal_conductivity")),

@@ -32,6 +32,7 @@ validParams<MoskitoFluidWell_2p1c>()
   InputParameters params = validParams<MoskitoFluidWellGeneral>();
   params += validParams<NewtonIteration>();
   params.addRequiredCoupledVar("enthalpy", "Specific enthalpy nonlinear variable (J/kg)");
+  params.addRequiredCoupledVar("density", "density nonlinear variable (kg)");
   params.addRequiredParam<UserObjectName>("eos_uo",
         "The name of the userobject for 2 phase EOS");
   params.addRequiredParam<UserObjectName>("viscosity_uo",
